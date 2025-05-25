@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         /* 基础样式 */
         body {
@@ -8,24 +9,42 @@
             padding: 0;
             min-height: 100vh;
             font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
             scroll-behavior: smooth;
-            background: #fff;
         }
 
-        /* 深色模式适配 */
-        @media (prefers-color-scheme: dark) {
-            body {
-                background: #1a1a1a;
-            }
-            .content-box {
-                background: #2d2d2d;
-                border: 1px solid #444;
-            }
+        /* 浅色模式样式 */
+        .light-mode {
+            background: #ffffff;
+            color: #333333;
+        }
+        .light-mode .title-container {
+            background: linear-gradient(to bottom, #ffffff, #f0f0f0);
+        }
+        .light-mode .content-box {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            box-shadow: 
+                0 8px 20px rgba(0,0,0,0.15),
+                inset 0 0 0 1px rgba(255,255,255,0.5);
         }
 
-        /* 文本容器 */
+        /* 深色模式样式 */
+        .dark-mode {
+            background: #121212;
+            color: #ffffff;
+        }
+        .dark-mode .title-container {
+            background: linear-gradient(to bottom, #121212, #1e1e1e);
+        }
+        .dark-mode .content-box {
+            background: #1e1e1e;
+            border: 1px solid #333333;
+            box-shadow: 
+                0 8px 20px rgba(0,0,0,0.3),
+                inset 0 0 0 1px rgba(255,255,255,0.05);
+        }
+
+        /* 标题容器 */
         .title-container {
             height: 40vh;
             display: flex;
@@ -35,8 +54,9 @@
         }
 
         .title {
-            font-size: 2.5rem;
+            font-size: 3rem;
             font-weight: bold;
+            color: inherit;
         }
 
         /* 内容容器 */
@@ -53,16 +73,13 @@
         .content-box {
             width: 80%;
             max-width: 800px;
-            background: #f5f5f5;
             border-radius: 12px;
-            border: 1px solid #ddd;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15), 
-                        inset 0 0 0 1px rgba(255,255,255,0.5);
             padding: 2rem;
             opacity: 0;
             transform: translateY(20%);
             animation: cardAppear 1.5s ease-out forwards;
             animation-delay: 0.5s;
+            color: inherit;
         }
 
         /* 动画定义 */
@@ -78,7 +95,7 @@
         }
     </style>
 </head>
-<body>
+<body class="light-mode"> <!-- 默认为浅色模式 -->
     <!-- 标题区域 -->
     <div class="title-container">
         <div class="title">你好</div>
@@ -87,10 +104,39 @@
     <!-- 文章区域 -->
     <div class="content-container">
         <div class="content-box">
-            <!-- 示例文章内容 -->
             <h2 style="margin-top:0;">文章标题</h2>
             <p>这里是文章正文内容，支持多行文本展示...</p>
         </div>
     </div>
+
+    <!-- JavaScript 动态监听深色模式变化 -->
+    <script>
+        // 应用主题
+        function applyTheme(isDark) {
+            document.body.classList.remove('light-mode', 'dark-mode');
+            document.body.classList.add(isDark ? 'dark-mode' : 'light-mode');
+        }
+
+        // 检测当前深色模式状态
+        function isDarkMode() {
+            return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+
+        // 初始化主题
+        applyTheme(isDarkMode());
+
+        // 监听深色模式变化
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        if (mediaQuery.addEventListener) {
+            mediaQuery.addEventListener('change', (e) => {
+                applyTheme(e.matches);
+            });
+        } else if (mediaQuery.addListener) {
+            // 兼容旧版 Safari (iOS < 14)
+            mediaQuery.addListener((e) => {
+                applyTheme(e.matches);
+            });
+        }
+    </script>
 </body>
 </html>
