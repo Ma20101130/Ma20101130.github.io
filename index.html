@@ -1,120 +1,285 @@
 <!DOCTYPE html>
 <html>
+
 <head>
+    <!-- 添加UTF-8字符编码声明 -->
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         /* 基础样式 */
         body {
             margin: 0;
             padding: 0;
-            min-height: 100vh;
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             scroll-behavior: smooth;
-        }
-
-        /* 浅色模式样式 */
-        .light-mode {
-            background: #ffffff;
-            color: #333333;
-        }
-        .light-mode .title-container {
-            background: linear-gradient(to bottom, #ffffff, #f0f0f0);
-        }
-        .light-mode .content-box {
-            background: #f5f5f5;
-            border: 1px solid #ddd;
-            box-shadow: 
-                0 8px 20px rgba(0,0,0,0.15),
-                inset 0 0 0 1px rgba(255,255,255,0.5);
+            background-color: #f5f5f7;
+            color: #1d1d1f;
         }
 
         /* 深色模式样式 */
-        .dark-mode {
-            background: #121212;
-            color: #ffffff;
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #121212;
+                color: #f5f5f7;
+            }
+
+            .card {
+                background-color: #1d1d1f;
+                color: #e0e0e0;
+            }
+
+            .title-container {
+                background-color: #1d1d1f;
+                color: #e0e0e0;
+            }
+            
+            .subtitle {
+                color: #a0a0a0;
+            }
+            
+            .back-to-top {
+                background-color: rgba(45, 45, 45, 0.8);
+                color: #f5f5f7;
+            }
+            
+            .back-to-top:hover {
+                background-color: rgba(60, 60, 60, 0.9);
+            }
         }
-        .dark-mode .title-container {
-            background: linear-gradient(to bottom, #121212, #1e1e1e);
+
+        /* 深色模式类样式 - 优先级高于媒体查询 */
+        body.dark-mode {
+            background-color: #121212;
+            color: #f5f5f7;
         }
-        .dark-mode .content-box {
-            background: #1e1e1e;
-            border: 1px solid #333333;
-            box-shadow: 
-                0 8px 20px rgba(0,0,0,0.3),
-                inset 0 0 0 1px rgba(255,255,255,0.05);
+
+        body.dark-mode .card {
+            background-color: #1d1d1f;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .title-container {
+            background-color: #1d1d1f;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .subtitle {
+            color: #a0a0a0;
+        }
+        
+        body.dark-mode .back-to-top {
+            background-color: rgba(45, 45, 45, 0.8);
+            color: #f5f5f7;
+        }
+        
+        body.dark-mode .back-to-top:hover {
+            background-color: rgba(60, 60, 60, 0.9);
+        }
+
+        /* 自然缓动函数定义 */
+        :root {
+            --ease-in-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
         }
 
         /* 标题容器 */
         .title-container {
             height: 40vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            animation: riseFade 1.2s ease-out forwards;
+            text-align: center;
+            padding: 2rem;
+            background-color: #fbfbfd;
+            margin-bottom: 1rem;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1s var(--ease-in-out-expo), transform 1s var(--ease-in-out-expo);
+        }
+
+        .title-container.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .title {
-            font-size: 3rem;
+            font-size: clamp(2rem, 5vw, 3.5rem);
             font-weight: bold;
-            color: inherit;
+            margin-bottom: 0.5rem;
         }
 
-        /* 内容容器 */
+        .subtitle {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            color: #6e6e73;
+            max-width: 800px;
+        }
+
+        /* 内容容器 - 响应式网格 */
         .content-container {
-            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        /* 卡片样式 */
+        .card {
+            border-radius: 18px;
+            padding: 2rem;
+            background-color: #ffffff;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            position: relative;
+            transition: 
+                transform 0.3s var(--ease-in-out-expo), 
+                box-shadow 0.3s var(--ease-in-out-expo), 
+                opacity 1s var(--ease-in-out-expo), 
+                transform 1s var(--ease-in-out-expo);
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        .card p,
+        .card ul,
+        .card ol {
+            font-size: clamp(1rem, 1.5vw, 1.1rem);
+            line-height: 1.6;
+        }
+
+        /* 返回顶部按钮 */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #333;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 2rem;
-            box-sizing: border-box;
-        }
-
-        /* 文章卡片样式 */
-        .content-box {
-            width: 80%;
-            max-width: 800px;
-            border-radius: 12px;
-            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
             opacity: 0;
-            transform: translateY(20%);
-            animation: cardAppear 1.5s ease-out forwards;
-            animation-delay: 0.5s;
-            color: inherit;
+            visibility: hidden;
+            transition: opacity 0.3s var(--ease-in-out-expo), visibility 0.3s var(--ease-in-out-expo);
+            z-index: 100;
         }
 
-        /* 动画定义 */
-        @keyframes riseFade {
-            0% { opacity: 0; transform: translateY(100%); }
-            100% { opacity: 1; transform: translateY(0); }
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
         }
 
-        @keyframes cardAppear {
-            0% { opacity: 0; transform: translateY(20%); }
-            60% { opacity: 0.7; transform: translateY(5%); }
-            100% { opacity: 1; transform: translateY(0); }
+        .back-to-top:hover {
+            background-color: rgba(255, 255, 255, 0.95);
+        }
+
+        .back-to-top svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* 响应式调整 */
+        @media (min-width: 768px) {
+            .content-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .title-container {
+                height: 50vh;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .content-container {
+                grid-template-columns: repeat(2, 1fr);
+                max-width: 1600px;
+                margin: 0 auto;
+            }
         }
     </style>
 </head>
-<body class="light-mode"> <!-- 默认为浅色模式 -->
+
+<body>
     <!-- 标题区域 -->
     <div class="title-container">
-        <div class="title">网页正在快速发展…</div>
+        <div class="title">我的个人网页</div>
+        <div class="subtitle">探索我的技能、项目和更多信息</div>
     </div>
 
-    <!-- 文章区域 -->
+    <!-- 内容区域 - 使用网格布局 -->
     <div class="content-container">
-        <div class="content-box">
-            <h2 style="margin-top:0;">关于该网站</h2>
-            <p>作者正在闲暇时间学习HTMl标记语言以构建该网站，请耐心等待…</p>
+        <!-- 关于我卡片 -->
+        <div class="card">
+            <h2>关于我</h2>
+            <p>大家好，我是马晨阳，一名热爱编程的学生。我热衷于探索新的知识和技术，不断挑战自我，追求卓越。</p>
+        </div>
+
+        <!-- 技能卡片 -->
+        <div class="card">
+            <h2>我的技能</h2>
+            <ul>
+                <li>技能 1：正常的摄影技术</li>
+                <li>技能 2：较好的剪视频能力</li>
+                <li>技能 3：几乎没有的HTML编写能力</li>
+            </ul>
+        </div>
+
+        <!-- 项目卡片 -->
+        <div class="card">
+            <h2>我的项目</h2>
+            <ol>
+                <li>项目 1：维护并更新此网页 - 计划于2025年底发布网页新界面</li>
+            </ol>
+        </div>
+
+        <!-- 联系卡片 -->
+        <div class="card">
+            <h2>联系我</h2>
+            <p>如果你想与我交流或合作，可以通过以下方式联系我：</p>
+            <ul>
+                <li>邮箱：2272844846@qq.com</li>
+                <li>电话：18868576574</li>
+                <li>微信：ma20101130</li>
+                <li>QQ：2272844846</li>
+            </ul>
         </div>
     </div>
 
-    <!-- JavaScript 动态监听深色模式变化 -->
+    <!-- 返回顶部按钮 -->
+    <div class="back-to-top" id="backToTop">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z" />
+        </svg>
+    </div>
+
+    <!-- JavaScript 动态监听深色模式变化、滚动动画和返回顶部按钮 -->
     <script>
         // 应用主题
         function applyTheme(isDark) {
-            document.body.classList.remove('light-mode', 'dark-mode');
-            document.body.classList.add(isDark ? 'dark-mode' : 'light-mode');
+            if (isDark) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
         }
 
         // 检测当前深色模式状态
@@ -137,6 +302,65 @@
                 applyTheme(e.matches);
             });
         }
+
+        // 滚动动画
+        document.addEventListener('DOMContentLoaded', () => {
+            const elements = document.querySelectorAll('.title-container, .card');
+            const backToTopButton = document.getElementById('backToTop');
+            
+            // 初始检查可见元素
+            checkVisibility();
+            
+            // 使用requestAnimationFrame优化滚动事件处理
+            let scrollTimeout;
+            window.addEventListener('scroll', () => {
+                if (scrollTimeout) {
+                    cancelAnimationFrame(scrollTimeout);
+                }
+                scrollTimeout = requestAnimationFrame(() => {
+                    checkVisibility();
+                    toggleBackToTopButton();
+                });
+            });
+            
+            // 返回顶部按钮点击事件
+            backToTopButton.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+            
+            function checkVisibility() {
+                const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+                
+                elements.forEach(element => {
+                    // 跳过已经可见的元素
+                    if (element.classList.contains('visible')) return;
+                    
+                    const rect = element.getBoundingClientRect();
+                    
+                    // 触发位置保持100px
+                    if (rect.top <= windowHeight - 100) {
+                        // 将延迟时间调整为50ms
+                        const delay = 50 * Array.from(elements).indexOf(element);
+                        
+                        setTimeout(() => {
+                            element.classList.add('visible');
+                        }, delay);
+                    }
+                });
+            }
+            
+            function toggleBackToTopButton() {
+                if (window.scrollY > 300) {
+                    backToTopButton.classList.add('visible');
+                } else {
+                    backToTopButton.classList.remove('visible');
+                }
+            }
+        });
     </script>
 </body>
+
 </html>
