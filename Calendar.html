@@ -1,0 +1,455 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { ChevronLeft, ChevronRight, Calendar, Inbox, ZoomIn, ZoomOut, AlertCircle, RefreshCw } from 'lucide-react';
+
+/**
+* ------------------------------------------------------------------
+* 配置与常量
+* ------------------------------------------------------------------
+*/
+
+// 主题色：橙黄色 (参考 iOS Calendar 的 Orange)
+const THEME_COLOR = '#FF9F0A';
+const THEME_BG_COLOR = '#FFF4E5'; // 浅色背景
+
+// 目标日历 URL
+const CALENDAR_URL = "webcal://p229-caldav.icloud.com.cn/published/2/MTYyOTg3NjY1NDExNjI5OO16cwF0wRes6xO2XO29_OCn8TwNIIofKRbNMJEIjR0IfrBR7W_YaoOPol64XPKolKvp17XfUHDCCv4BZ-MFqfA";
+
+// CORS 代理服务
+// 注意：如果你在 Netlify 上部署，建议创建一个 Netlify Function 来做代理，比使用公共代理更稳定。
+// 这里暂时使用公共代理以确保当前预览可用。
+const CORS_PROXY = "https://api.allorigins.win/raw?url=";
+
+/**
+* ------------------------------------------------------------------
+* ICS 解析逻辑
+* ------------------------------------------------------------------
+*/
+const parseICS = (icsData) => {
+ const events = [];
+ const lines = icsData.split(/\r\n|\n|\r/);
+ let currentEvent = null;
+
+ const parseDate = (dateStr) => {
+   if (!dateStr) return null;
+   // 处理形如 20251129T120000Z 的字符串
+   const year = parseInt(dateStr.substring(0, 4));
+   const month = parseInt(dateStr.substring(4, 6)) - 1;
+   const day = parseInt(dateStr.substring(6, 8));
+   
+   if (dateStr.length <= 8) {
+     return new Date(year, month, day);
+   }
+
+   let hour = parseInt(dateStr.substring(9, 11));
+   let minute = parseInt(dateStr.substring(11, 13));
+   let second = parseInt(dateStr.substring(13, 15));
+   
+   // 注意：这里没有处理复杂的时区转换，默认为本地时间解析
+   // 实际生产环境建议使用专门的库如 'ical.js'
+   return new Date(year, month, day, hour, minute, second);
+ };
+
+ for (let line of lines) {
+   if (line.startsWith('BEGIN:VEVENT')) {
+     currentEvent = {};
+   } else if (line.startsWith('END:VEVENT')) {
+     if (currentEvent && currentEvent.start) {
+        // 如果没有结束时间，默认1小时
+        if (!currentEvent.end) {
+            currentEvent.end = new Date(currentEvent.start.getTime() + 60 * 60 * 1000);
+        }
+        events.push(currentEvent);
+     }
+     currentEvent = null;
+   } else if (currentEvent) {
+     const parts = line.split(':');
+     if (parts.length < 2) continue;
+     
+     const keyPart = parts[0];
+     const value = parts.slice(1).join(':'); // 处理值中包含冒号的情况
+     const [key, ...params] = keyPart.split(';');
+
+     switch (key) {
+       case 'SUMMARY':
+         currentEvent.title = value;
+         break;
+       case 'DTSTART':
+         currentEvent.start = parseDate(value);
+         break;
+       case 'DTEND':
+         currentEvent.end = parseDate(value);
+         break;
+       case 'LOCATION':
+         currentEvent.location = value;
+         break;
+       case 'DESCRIPTION':
+         currentEvent.description = value;
+         break;
+     }
+   }
+ }
+ return events;
+};
+
+/**
+* ------------------------------------------------------------------
+* 组件部分
+* ------------------------------------------------------------------
+*/
+
+// 顶部简洁导航
+const NavBar = ({ currentDate, view, setView }) => {
+ const monthNames = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
+ const year = currentDate.getFullYear();
+ const month = monthNames[currentDate.getMonth()];
+
+ return (
+   <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100 pt-2 pb-2">
+     <div className="px-4 flex items-center justify-between">
+       {/* 左侧：只显示当前年月 */}
+       <h1 className="text-2xl font-bold text-gray-900 flex items-baseline gap-2">
+          {year}年 {month}
+       </h1>
+
+       {/* 右侧：视图切换 */}
+       <div className="flex bg-gray-100 rounded-lg p-0.5 ml-4">
+           <button
+               onClick={() => setView('month')}
+               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${view === 'month' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-gray-700'}`}
+           >
+               月
+           </button>
+           <button
+               onClick={() => setView('day')}
+               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${view === 'day' ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-gray-700'}`}
+           >
+               日
+           </button>
+       </div>
+     </div>
+   </div>
+ );
+};
+
+// 底部极简标签栏
+const TabBar = ({ onToday, onRefresh, loading }) => (
+ <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 h-16 flex items-center justify-around px-6 pb-safe z-50 text-[10px] text-gray-400">
+   <button onClick={onToday} className="flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform">
+     <div className="w-7 h-7 flex items-center justify-center relative">
+       <span className="font-bold text-base text-red-500">今</span>
+     </div>
+     <span className="text-red-500 font-medium">今天</span>
+   </button>
+   
+   <button onClick={onRefresh} disabled={loading} className={`flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform ${loading ? 'opacity-50' : ''}`}>
+      <RefreshCw className={`w-6 h-6 ${loading ? 'animate-spin text-gray-400' : 'text-gray-400'}`} />
+      <span>刷新</span>
+   </button>
+
+   <div className="flex flex-col items-center justify-center gap-1 opacity-40 pointer-events-none">
+      <Inbox className="w-6 h-6" />
+      <span>收件箱</span>
+   </div>
+ </div>
+);
+
+// 月视图
+const MonthView = ({ currentDate, events, onSelectDate }) => {
+ const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+ const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
+ 
+ const days = Array(firstDayOfMonth).fill(null).concat(
+   Array.from({ length: daysInMonth }, (_, i) => new Date(currentDate.getFullYear(), currentDate.getMonth(), i + 1))
+ );
+
+ const isToday = (date) => {
+   const today = new Date();
+   return date && date.toDateString() === today.toDateString();
+ };
+
+ const hasEvent = (date) => {
+   if (!date) return false;
+   return events.some(e => e.start.toDateString() === date.toDateString());
+ };
+
+ return (
+   <div className="bg-white min-h-[400px] animate-fade-in">
+     <div className="grid grid-cols-7 text-center border-b border-gray-100 py-2 mb-2">
+       {['日', '一', '二', '三', '四', '五', '六'].map((d, i) => (
+         <div key={i} className="text-xs text-gray-400 font-medium">{d}</div>
+       ))}
+     </div>
+     <div className="grid grid-cols-7 gap-y-1">
+       {days.map((date, idx) => (
+         <div
+           key={idx}
+           className="flex flex-col items-center justify-start h-12 relative cursor-pointer group"
+           onClick={() => date && onSelectDate(date)}
+         >
+           {date && (
+             <>
+               <div className={`
+                 w-8 h-8 flex items-center justify-center rounded-full text-base font-medium mb-0.5 transition-colors
+                 ${isToday(date) ? 'bg-red-500 text-white' : 'text-gray-900 group-hover:bg-gray-100'}
+               `}>
+                 {date.getDate()}
+               </div>
+               {/* 事件点统一使用橙色 */}
+               <div className="flex gap-0.5 h-1.5">
+                  {hasEvent(date) && <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: THEME_COLOR }}></div>}
+               </div>
+             </>
+           )}
+         </div>
+       ))}
+     </div>
+     
+     {/* 月视图下方的当日列表 */}
+     <div className="px-4 py-4 mt-2 border-t border-gray-100">
+         <h3 className="text-gray-400 text-xs font-medium mb-3">选中日期的日程</h3>
+         {events
+           .filter(e => e.start.toDateString() === currentDate.toDateString())
+           .map((e, i) => (
+               <div key={i} className="flex mb-3 items-center">
+                   <div className="w-14 text-right text-xs text-gray-500 mr-3">
+                       {e.allDay ? '全天' : `${e.start.getHours()}:${e.start.getMinutes().toString().padStart(2, '0')}`}
+                   </div>
+                   <div className="flex-1 pl-3 border-l-[3px] py-1" style={{ borderColor: THEME_COLOR }}>
+                       <div className="text-sm font-semibold text-gray-800">{e.title}</div>
+                       {e.location && <div className="text-xs text-gray-400 mt-0.5">{e.location}</div>}
+                   </div>
+               </div>
+           ))}
+           {events.filter(e => e.start.toDateString() === currentDate.toDateString()).length === 0 && (
+               <div className="text-center text-gray-400 text-sm py-4">无日程</div>
+           )}
+     </div>
+   </div>
+ );
+};
+
+// 日视图
+const DayView = ({ currentDate, events }) => {
+ const scrollRef = useRef(null);
+ // 高度控制 state
+ const [hourHeight, setHourHeight] = useState(60); // 默认 60px/小时
+
+ // 滚动到当前时间
+ useEffect(() => {
+   if (scrollRef.current) {
+     const now = new Date();
+     // 如果查看的是今天，滚动到当前时间；否则滚动到8点
+     const isTodayView = currentDate.toDateString() === now.toDateString();
+     const targetHour = isTodayView ? now.getHours() : 8;
+     scrollRef.current.scrollTop = (targetHour * hourHeight) - 100;
+   }
+ }, [currentDate, hourHeight]); // 当高度变化时也调整滚动位置，尽量保持视野
+
+ const dayEvents = events.filter(e => e.start.toDateString() === currentDate.toDateString());
+ const hours = Array.from({ length: 24 }, (_, i) => i);
+ const now = new Date();
+ const isToday = now.toDateString() === currentDate.toDateString();
+ const currentTimeTop = isToday ? ((now.getHours() * 60) + now.getMinutes()) * (hourHeight / 60) : null;
+
+ // 调整高度函数
+ const adjustZoom = (delta) => {
+   setHourHeight(prev => {
+       const newVal = prev + delta;
+       return Math.max(30, Math.min(150, newVal)); // 限制在 30px - 150px 之间
+   });
+ };
+
+ return (
+   <div className="flex-1 overflow-hidden relative bg-white">
+     {/* 缩放控制悬浮按钮 */}
+     <div className="absolute bottom-6 right-6 z-30 flex flex-col gap-2 bg-white/90 backdrop-blur shadow-lg rounded-full p-1.5 border border-gray-100">
+        <button onClick={() => adjustZoom(10)} className="p-2 rounded-full hover:bg-gray-100 active:bg-gray-200 text-gray-600">
+           <ZoomIn className="w-5 h-5" />
+        </button>
+        <div className="h-px w-full bg-gray-200"></div>
+        <button onClick={() => adjustZoom(-10)} className="p-2 rounded-full hover:bg-gray-100 active:bg-gray-200 text-gray-600">
+           <ZoomOut className="w-5 h-5" />
+        </button>
+     </div>
+
+     <div className="h-full overflow-y-auto" ref={scrollRef}>
+       <div className="relative" style={{ height: `${24 * hourHeight}px` }}>
+           {/* 时间网格 */}
+           {hours.map(h => (
+           <div key={h} className="absolute w-full border-t border-gray-100 flex" style={{ top: `${h * hourHeight}px` }}>
+               <div className="w-14 text-right pr-3 text-[10px] text-gray-400 -mt-1.5 transform translate-y-0 select-none">
+                  {h}:00
+               </div>
+               <div className="flex-1"></div>
+           </div>
+           ))}
+
+           {/* 当前时间红线 */}
+           {currentTimeTop !== null && (
+           <div className="absolute w-full z-10 flex items-center pointer-events-none" style={{ top: `${currentTimeTop}px` }}>
+               <div className="w-14 pr-2 flex justify-end">
+                   <div className="text-[9px] text-red-500 font-bold bg-white px-0.5 rounded">
+                       {now.getHours()}:{now.getMinutes().toString().padStart(2, '0')}
+                   </div>
+               </div>
+               <div className="flex-1 h-px bg-red-500 relative">
+                   <div className="absolute -left-1 -top-1 w-2 h-2 rounded-full bg-red-500"></div>
+               </div>
+           </div>
+           )}
+
+           {/* 事件渲染 */}
+           {dayEvents.filter(e => !e.allDay).map((e, i) => {
+               const startMin = e.start.getHours() * 60 + e.start.getMinutes();
+               const endMin = e.end.getHours() * 60 + e.end.getMinutes();
+               const durationMin = endMin - startMin;
+               
+               const top = startMin * (hourHeight / 60);
+               const height = Math.max(hourHeight / 2, durationMin * (hourHeight / 60)); // 最小高度
+
+               return (
+                   <div
+                   key={i}
+                   className="absolute left-14 right-2 rounded-md p-1.5 border-l-4 shadow-sm text-xs overflow-hidden cursor-pointer hover:brightness-95 transition-all"
+                   style={{
+                       top: `${top}px`,
+                       height: `${height}px`,
+                       backgroundColor: THEME_BG_COLOR,
+                       borderLeftColor: THEME_COLOR,
+                       color: '#4A3B22' // 深棕色字体，保证在浅橙色背景上的对比度
+                   }}
+                   >
+                       <div className="font-bold leading-tight mb-0.5">{e.title}</div>
+                       <div className="text-[10px] opacity-75">
+                           {e.start.getHours()}:{e.start.getMinutes().toString().padStart(2, '0')} -
+                           {e.end.getHours()}:{e.end.getMinutes().toString().padStart(2, '0')}
+                       </div>
+                       {e.location && <div className="text-[10px] opacity-70 truncate mt-1">📍 {e.location}</div>}
+                   </div>
+               );
+           })}
+       </div>
+     </div>
+   </div>
+ );
+};
+
+// 错误提示组件
+const ErrorState = ({ error, retry }) => (
+   <div className="flex flex-col items-center justify-center h-full px-8 text-center text-gray-500">
+       <AlertCircle className="w-12 h-12 text-red-400 mb-4" />
+       <h3 className="text-lg font-semibold text-gray-800 mb-2">无法加载日历</h3>
+       <p className="text-sm mb-6 text-gray-400">{error}</p>
+       <button
+           onClick={retry}
+           className="px-6 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium active:scale-95 transition-transform"
+       >
+           重试
+       </button>
+       <div className="mt-8 text-xs text-gray-300 max-w-xs">
+           提示: 请检查 WebCal 链接是否有效，或确认您的网络可以访问 iCloud 服务器。
+       </div>
+   </div>
+);
+
+/**
+* ------------------------------------------------------------------
+* 主入口
+* ------------------------------------------------------------------
+*/
+export default function AppleCalendarClone() {
+ const [currentDate, setCurrentDate] = useState(new Date()); // 默认今天
+ const [view, setView] = useState('day'); // 默认日视图
+ const [events, setEvents] = useState([]);
+ const [loading, setLoading] = useState(true);
+ const [error, setError] = useState(null);
+
+ const fetchCalendar = async () => {
+   setLoading(true);
+   setError(null);
+   try {
+     const httpUrl = CALENDAR_URL.replace('webcal://', 'https://');
+     // 使用代理请求
+     const response = await fetch(`${CORS_PROXY}${encodeURIComponent(httpUrl)}`);
+     
+     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+     
+     const text = await response.text();
+     const parsedEvents = parseICS(text);
+     
+     if (parsedEvents.length === 0) {
+         console.warn("Parsed 0 events. ICS content might be empty or format unknown.");
+     }
+     
+     setEvents(parsedEvents);
+   } catch (err) {
+     console.error("Fetch failed:", err);
+     setError(err.message || "请求超时或被拦截");
+   } finally {
+     setLoading(false);
+   }
+ };
+
+ useEffect(() => {
+   fetchCalendar();
+   // 自动刷新机制 (可选，每5分钟刷新一次)
+   const interval = setInterval(fetchCalendar, 5 * 60 * 1000);
+   return () => clearInterval(interval);
+ }, []);
+
+ const handleToday = () => {
+     const now = new Date();
+     setCurrentDate(now);
+     // 如果需要，可以强制切回日视图
+     setView('day');
+ };
+
+ return (
+   <div className="flex flex-col h-screen max-w-md mx-auto bg-white shadow-2xl relative text-sans overflow-hidden">
+     
+     {/* 顶部导航 */}
+     <NavBar
+       currentDate={currentDate}
+       view={view}
+       setView={setView}
+     />
+
+     {/* 主内容区域 */}
+     <div className="flex-1 overflow-hidden flex flex-col relative pb-16">
+       {loading && events.length === 0 ? (
+           <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-3">
+               <div className="w-8 h-8 border-[3px] border-gray-200 border-t-red-500 rounded-full animate-spin"></div>
+               <div className="text-sm font-medium">正在同步日历...</div>
+           </div>
+       ) : error && events.length === 0 ? (
+           <ErrorState error={error} retry={fetchCalendar} />
+       ) : (
+           <>
+               {view === 'month' ? (
+                   <MonthView
+                       currentDate={currentDate}
+                       events={events}
+                       onSelectDate={(date) => {
+                           setCurrentDate(date);
+                           setView('day');
+                       }}
+                   />
+               ) : (
+                   <DayView
+                       currentDate={currentDate}
+                       events={events}
+                   />
+               )}
+           </>
+       )}
+     </div>
+
+     {/* 底部导航 */}
+     <TabBar
+       onToday={handleToday}
+       onRefresh={fetchCalendar}
+       loading={loading}
+     />
+   </div>
+ );
+}
