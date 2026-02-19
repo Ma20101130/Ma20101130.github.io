@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+<!DOCTYPE html>
+<html>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
@@ -142,12 +145,11 @@
             <div class="subtitle">目标页面不存在，或无法找到</div>
         </div>
         
-        <!-- 超链接按钮（永远在下方） -->
-        <a href="https://ma20101130.netlify.app" class="redirect-link" id="redirectLink">
+        <!-- 超链接按钮：移除固定href，由JS动态赋值 -->
+        <a href="javascript:;" class="redirect-link" id="redirectLink">
             点击以重定向至主页
         </a>
     </div>
-
     <script>
         // 深色模式适配逻辑
         function applyTheme(isDark) {
@@ -163,11 +165,31 @@
         mediaQuery.addEventListener?.('change', (e) => applyTheme(e.matches));
         if (mediaQuery.addListener) mediaQuery.addListener((e) => applyTheme(e.matches));
 
-        // 页面加载触发同步动画：404上移 + 按钮上移，保持整体居中
+        // 核心改造：根据域名动态匹配跳转根目录，兜底为macy.pages.dev
+        function getHomepageUrl() {
+            const hostname = window.location.hostname;
+            // 匹配macy.pages.dev域名，返回其根目录
+            if (hostname.includes('macy.pages.dev')) {
+                return 'https://macy.pages.dev';
+            }
+            // 匹配ma20101130.netlify.app域名，返回其根目录
+            else if (hostname.includes('ma20101130.netlify.app')) {
+                return 'https://ma20101130.netlify.app';
+            }
+            // 兜底：未知域名默认跳转到macy.pages.dev
+            else {
+                return 'https://macy.pages.dev';
+            }
+        }
+
+        // 页面加载触发同步动画+初始化跳转链接
         document.addEventListener('DOMContentLoaded', () => {
             const titleContainer = document.getElementById('titleContainer');
             const redirectLink = document.getElementById('redirectLink');
             
+            // 初始化按钮跳转链接
+            redirectLink.href = getHomepageUrl();
+
             // 同步触发动画：404上移10px，按钮上移40px（回到正常位置），视觉平衡
             setTimeout(() => {
                 titleContainer.style.opacity = '1';
