@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>觉醒协议 | 致初三</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -40,10 +39,9 @@
             background: var(--bg-primary);
             color: var(--text-primary);
             line-height: 1.8;
-            overflow-x: hidden;
         }
 
-        /* 动态背景 */
+        /* 简化背景 - 纯色+微弱网格 */
         .ambient-bg {
             position: fixed;
             top: 0;
@@ -51,42 +49,9 @@
             width: 100vw;
             height: 100vh;
             z-index: -1;
-            overflow: hidden;
+            background: var(--bg-primary);
         }
 
-        .gradient-orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(100px);
-            opacity: 0.4;
-        }
-
-        .orb-1 {
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, #1a1a2e 0%, transparent 70%);
-            top: -200px;
-            left: -200px;
-        }
-
-        .orb-2 {
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, #16213e 0%, transparent 70%);
-            bottom: -100px;
-            right: -100px;
-        }
-
-        .orb-3 {
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, #0f3460 0%, transparent 70%);
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        /* 网格背景 */
         .grid-bg {
             position: fixed;
             top: 0;
@@ -94,49 +59,50 @@
             width: 100%;
             height: 100%;
             background-image:
-                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-            background-size: 50px 50px;
+                linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+            background-size: 60px 60px;
             z-index: -1;
+        }
+
+        /* 单一进度条 */
+        .reading-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--blue-accent));
+            width: 0%;
+            z-index: 1001;
         }
 
         /* 导航栏 */
         .nav {
             position: fixed;
-            top: 0;
+            top: 3px;
             left: 0;
             width: 100%;
-            padding: 1rem 2rem;
+            padding: 0.8rem 2rem;
             z-index: 1000;
-            background: rgba(10, 10, 10, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--card-border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transform: translateY(-100%);
         }
 
         .logo {
             font-family: var(--font-display);
             font-weight: 900;
-            font-size: 1.2rem;
+            font-size: 1rem;
             letter-spacing: 2px;
-        }
-
-        .nav-progress {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 2px;
-            background: linear-gradient(90deg, var(--accent), var(--blue-accent));
-            width: 0%;
+            color: var(--text-primary);
         }
 
         /* 主要容器 */
         .container {
-            max-width: 900px;
+            max-width: 850px;
             margin: 0 auto;
             padding: 0 1.5rem;
         }
@@ -150,7 +116,6 @@
             align-items: center;
             text-align: center;
             padding: 6rem 1.5rem;
-            position: relative;
         }
 
         .hero-badge {
@@ -162,12 +127,11 @@
             font-size: 0.85rem;
             color: var(--text-secondary);
             margin-bottom: 2rem;
-            backdrop-filter: blur(10px);
         }
 
         .hero h1 {
             font-family: var(--font-display);
-            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
             font-weight: 900;
             line-height: 1.1;
             margin-bottom: 1.5rem;
@@ -178,9 +142,9 @@
         }
 
         .hero-subtitle {
-            font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+            font-size: clamp(1.1rem, 2.5vw, 1.4rem);
             color: var(--text-secondary);
-            max-width: 600px;
+            max-width: 550px;
             margin-bottom: 3rem;
             font-weight: 300;
         }
@@ -227,36 +191,35 @@
 
         /* 章节通用样式 */
         .section {
-            padding: 6rem 0;
-            position: relative;
+            padding: 5rem 0;
         }
 
         .section-header {
             text-align: center;
-            margin-bottom: 4rem;
+            margin-bottom: 3rem;
         }
 
         .section-number {
             font-family: var(--font-display);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--accent);
             letter-spacing: 3px;
-            margin-bottom: 1rem;
+            margin-bottom: 0.8rem;
             display: block;
         }
 
         .section-title {
             font-family: var(--font-display);
-            font-size: clamp(2rem, 5vw, 3rem);
+            font-size: clamp(1.8rem, 5vw, 2.8rem);
             font-weight: 700;
-            margin-bottom: 1rem;
+            margin-bottom: 0.8rem;
             line-height: 1.2;
         }
 
         .section-subtitle {
             color: var(--text-secondary);
-            font-size: 1.1rem;
-            max-width: 600px;
+            font-size: 1rem;
+            max-width: 550px;
             margin: 0 auto;
         }
 
@@ -264,18 +227,22 @@
         .content-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 24px;
-            padding: 3rem;
-            margin-bottom: 2rem;
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 1.5rem;
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            opacity: 0;
-            transform: translateY(50px);
         }
 
-        .content-card.visible {
-            opacity: 1;
-            transform: translateY(0);
+        .content-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1.2rem;
+            font-size: 1rem;
+            line-height: 1.85;
+        }
+
+        .content-card p:first-of-type {
+            font-size: 1.15rem;
+            color: var(--text-primary);
         }
 
         /* 强调文字 */
@@ -289,29 +256,33 @@
             font-weight: 600;
         }
 
-        /* 段落样式 */
-        .content-card p {
-            color: var(--text-secondary);
-            margin-bottom: 1.5rem;
-            font-size: 1.05rem;
-            line-height: 1.9;
-        }
-
-        .content-card p:first-of-type {
-            font-size: 1.2rem;
+        /* 引用块 */
+        .quote-block {
+            border-left: 3px solid var(--accent);
+            padding-left: 1.2rem;
+            margin: 1.5rem 0;
             color: var(--text-primary);
-            font-weight: 400;
+            font-style: italic;
+            font-size: 1.05rem;
         }
 
-        /* 列表样式 */
+        /* 子标题 */
+        .content-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            margin: 1.8rem 0 1rem;
+            color: var(--text-primary);
+        }
+
+        /* 列表 */
         .content-card ul, .content-card ol {
             color: var(--text-secondary);
-            margin: 1.5rem 0;
-            padding-left: 1.5rem;
+            margin: 1.2rem 0;
+            padding-left: 1.3rem;
         }
 
         .content-card li {
-            margin-bottom: 0.8rem;
+            margin-bottom: 0.6rem;
             line-height: 1.7;
         }
 
@@ -319,64 +290,48 @@
             color: var(--accent);
         }
 
-        /* 子标题 */
-        .content-card h3 {
-            font-family: var(--font-display);
-            font-size: 1.5rem;
-            margin: 2rem 0 1rem;
-            color: var(--text-primary);
+        /* 概念网格 */
+        .concept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
         }
 
-        .content-card h4 {
-            font-size: 1.2rem;
-            margin: 1.5rem 0 0.8rem;
-            color: var(--text-primary);
+        .concept-item {
+            background: var(--glass);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 1.3rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .concept-item:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent);
+        }
+
+        .concept-icon {
+            font-size: 2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .concept-title {
             font-weight: 600;
-        }
-
-        /* 引用块 */
-        .quote-block {
-            border-left: 3px solid var(--accent);
-            padding-left: 1.5rem;
-            margin: 2rem 0;
+            margin-bottom: 0.4rem;
             color: var(--text-primary);
-            font-style: italic;
-            font-size: 1.1rem;
+            font-size: 0.95rem;
         }
 
-        /* 图片展示 */
-        .image-section {
-            margin: 3rem 0;
-            border-radius: 20px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .image-section img {
-            width: 100%;
-            height: auto;
-            display: block;
-            transition: transform 0.5s ease;
-        }
-
-        .image-section:hover img {
-            transform: scale(1.02);
-        }
-
-        .image-caption {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 1rem 1.5rem;
-            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+        .concept-desc {
+            font-size: 0.8rem;
             color: var(--text-secondary);
-            font-size: 0.85rem;
         }
 
         /* 时间线 */
         .timeline {
-            margin: 2rem 0;
+            margin: 1.5rem 0;
             position: relative;
         }
 
@@ -391,8 +346,8 @@
         }
 
         .timeline-item {
-            padding-left: 2rem;
-            margin-bottom: 2rem;
+            padding-left: 1.8rem;
+            margin-bottom: 1.5rem;
             position: relative;
         }
 
@@ -400,15 +355,15 @@
             content: '';
             position: absolute;
             left: -5px;
-            top: 8px;
-            width: 12px;
-            height: 12px;
+            top: 6px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: var(--accent);
         }
 
         .timeline-time {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--accent);
             font-weight: 600;
             margin-bottom: 0.3rem;
@@ -416,57 +371,24 @@
 
         .timeline-content {
             color: var(--text-secondary);
+            font-size: 0.95rem;
         }
 
-        /* 概念图 */
-        .concept-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-
-        .concept-item {
-            background: var(--glass);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 1.5rem;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .concept-item:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent);
-        }
-
-        .concept-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .concept-title {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-        }
-
-        .concept-desc {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
+        .timeline-content ul {
+            margin: 0.5rem 0;
         }
 
         /* 结语区域 */
         .conclusion {
             text-align: center;
-            padding: 8rem 0;
+            padding: 7rem 0;
         }
 
         .conclusion h2 {
             font-family: var(--font-display);
-            font-size: clamp(2rem, 6vw, 4rem);
+            font-size: clamp(1.8rem, 5vw, 3.5rem);
             font-weight: 900;
-            margin-bottom: 2rem;
+            margin-bottom: 1.8rem;
             background: linear-gradient(135deg, var(--accent) 0%, #ff6b6b 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -475,28 +397,22 @@
 
         .conclusion p {
             color: var(--text-secondary);
-            font-size: 1.2rem;
-            max-width: 700px;
-            margin: 0 auto 3rem;
+            font-size: 1.1rem;
+            max-width: 650px;
+            margin: 0 auto 2rem;
             line-height: 1.8;
         }
 
-        .cta-group {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
         .btn {
-            padding: 1rem 2.5rem;
+            padding: 0.9rem 2rem;
             border-radius: 50px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
             display: inline-block;
+            margin: 0.3rem;
         }
 
         .btn-primary {
@@ -510,33 +426,22 @@
             box-shadow: 0 10px 40px var(--accent-glow);
         }
 
-        .btn-secondary {
-            background: transparent;
-            color: var(--text-primary);
-            border: 1px solid var(--card-border);
-        }
-
-        .btn-secondary:hover {
-            background: var(--glass);
-            border-color: var(--text-secondary);
-        }
-
         /* 底部 */
         .footer {
             text-align: center;
-            padding: 3rem;
+            padding: 2.5rem;
             border-top: 1px solid var(--card-border);
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         /* 返回顶部 */
         .back-to-top {
             position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            width: 50px;
-            height: 50px;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 44px;
+            height: 44px;
             background: var(--glass);
             border: 1px solid var(--card-border);
             border-radius: 50%;
@@ -548,7 +453,6 @@
             visibility: hidden;
             transition: all 0.3s ease;
             z-index: 100;
-            backdrop-filter: blur(10px);
         }
 
         .back-to-top.visible {
@@ -559,83 +463,59 @@
         .back-to-top:hover {
             background: var(--accent);
             border-color: var(--accent);
-            transform: translateY(-3px);
         }
 
         /* 响应式 */
         @media (max-width: 768px) {
             .hero {
-                padding: 4rem 1rem;
+                padding: 5rem 1rem;
             }
 
             .content-card {
-                padding: 2rem 1.5rem;
+                padding: 1.8rem 1.3rem;
             }
 
             .section {
                 padding: 4rem 0;
             }
 
+            .nav {
+                padding: 0.7rem 1rem;
+            }
+
             .concept-grid {
                 grid-template-columns: 1fr;
             }
         }
-
-        /* 动画类 */
-        .fade-in {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-
-        .fade-in.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* 进度条 */
-        .reading-progress {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--accent), var(--blue-accent));
-            width: 0%;
-            z-index: 1001;
-        }
     </style>
 </head>
 <body>
-    <!-- 动态背景 -->
-    <div class="ambient-bg">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
-        <div class="gradient-orb orb-3"></div>
-    </div>
+    <!-- 简化背景 -->
+    <div class="ambient-bg"></div>
     <div class="grid-bg"></div>
 
-    <!-- 阅读进度条 -->
+    <!-- 单一进度条 -->
     <div class="reading-progress" id="readingProgress"></div>
 
     <!-- 导航栏 -->
-    <nav class="nav" id="navbar">
+    <nav class="nav">
         <div class="logo">AWAKENING</div>
-        <div class="nav-progress" id="navProgress"></div>
     </nav>
 
     <!-- Hero 区域 -->
     <section class="hero">
-        <div class="hero-badge">⚡ 觉醒协议</div>
-        <h1 id="heroTitle">觉醒协议</h1>
-        <p class="hero-subtitle" id="heroSubtitle">致初三：如何在 24 小时内终结平庸的循环</p>
+        <div class="hero-badge">觉醒协议</div>
+        <h1>觉醒协议</h1>
+        <p class="hero-subtitle">致初三：如何在 24 小时内终结平庸的循环</p>
         <a href="#intro" class="hero-cta">
             开始阅读
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
             </svg>
         </a>
         <div class="scroll-indicator">
             <span>向下滚动</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 5v14M5 12l7 7 7-7"/>
             </svg>
         </div>
@@ -644,8 +524,8 @@
     <!-- 前言 -->
     <section class="section" id="intro">
         <div class="container">
-            <div class="content-card" id="card1">
-                <h2 style="font-family: var(--font-display); font-size: 2rem; margin-bottom: 1.5rem;">前言：你不是在"学习"，你是在被"格式化"</h2>
+            <div class="content-card">
+                <h2 style="font-family: var(--font-display); font-size: 1.8rem; margin-bottom: 1.2rem;">前言：你不是在"学习"，你是在被"格式化"</h2>
 
                 <p>大多数初三学生正处于一种<span class="highlight">"活死人"</span>的状态。</p>
 
@@ -676,11 +556,6 @@
                 <p>你以为你在刷抖音、打游戏是在休息？<span class="highlight">错。你是在向算法交出你的"灵魂控制权"。</span></p>
 
                 <p>当你感到初三的压力大到无法呼吸时，大脑会本能地寻找廉价的多巴胺。算法精准地捕捉到了这种软弱。每一条短视频都是对你认知带宽的"小额贷款"，你以为利息很低，但最终你付出了整个青春的专注力。</p>
-
-                <div class="image-section">
-                    <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200" alt="数字世界的束缚">
-                    <div class="image-caption">算法时代，我们的注意力正在被系统性收割</div>
-                </div>
             </div>
 
             <div class="content-card">
@@ -742,11 +617,6 @@
                 <p>如果你想和他们考入同一所平凡的高中，那就加入他们。</p>
 
                 <p>如果你想去更高的地方，你必须立刻支付这笔<span class="highlight-blue">"社交税"</span>——<strong>忍受孤独</strong>。卓越的代名词，就是<span class="highlight">"在人群中保持清醒的孤立"</span>。</p>
-
-                <div class="image-section">
-                    <img src="https://images.unsplash.com/photo-1519834785169-98be25ec3f84?w=1200" alt="孤独的觉醒者">
-                    <div class="image-caption">卓越之路注定孤独，但你并不孤单</div>
-                </div>
             </div>
         </div>
     </section>
@@ -840,11 +710,6 @@
                 <h3>2. 能量管理，而非时间管理</h3>
                 <p>你不需要每天学 16 个小时。你需要的是 <span class="highlight-blue">4 个小时极度纯净的、不被打断的"神流状态（Flow）"</span>。</p>
 
-                <div class="image-section">
-                    <img src="https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=1200" alt="心流状态">
-                    <div class="image-caption">进入心流，你将所向披靡</div>
-                </div>
-
                 <ul>
                     <li><strong>早晨</strong>：处理逻辑复杂度最高的任务（数学/物理）</li>
                     <li><strong>午后</strong>：进行信息的输入与整合</li>
@@ -864,24 +729,24 @@
 
                 <p>如果你依然选择在抖音的算法里沉溺，在老师的督促下被动地像牛一样反刍，那么你这辈子都无法摆脱<span class="highlight">"被操控"</span>的命运。</p>
 
-                <div class="quote-block" style="border-color: var(--blue-accent); font-size: 1.3rem;">
+                <div class="quote-block" style="border-color: var(--blue-accent); font-size: 1.2rem;">
                     这个世界是一个巨大的镜子。<br>
                     如果你以平庸的姿态站立，<br>
                     世界回馈给你的就是破碎的反馈。
                 </div>
 
-                <p style="margin-top: 3rem;">现在，放下这篇文章。<br>
+                <p style="margin-top: 2.5rem;">现在，放下这篇文章。<br>
                 关掉屏幕。<br>
                 去感受你内心的那股焦虑——<span class="highlight">不要逃避它，它是你的燃料</span>。<br>
                 去接管你的专注力。<br>
                 去重塑你的身份。</p>
 
-                <h2 style="font-size: clamp(1.5rem, 4vw, 2.5rem); margin-top: 4rem;">
+                <h2 style="font-size: clamp(1.4rem, 3.5vw, 2.2rem); margin-top: 3.5rem;">
                     今天，是你作为<span class="highlight">"神谕架构师"</span>出生的第一天。<br>
                     中考卷子，只是你通往伟大的第一块垫脚石。
                 </h2>
 
-                <div class="cta-group">
+                <div style="margin-top: 2.5rem;">
                     <a href="#" class="btn btn-primary" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
                         重新阅读
                     </a>
@@ -892,228 +757,39 @@
 
     <!-- 底部 -->
     <footer class="footer">
-        <p>觉醒协议 &copy; 2025 | Designed with ⚡</p>
+        <p>觉醒协议 &copy; 2025</p>
     </footer>
 
     <!-- 返回顶部 -->
     <div class="back-to-top" id="backToTop">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 15l-6-6-6 6"/>
         </svg>
     </div>
 
     <script>
-        // 页面加载完成后初始化动画
-        document.addEventListener('DOMContentLoaded', function() {
+        // 简单的进度条和返回顶部逻辑
+        window.addEventListener('scroll', function() {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
 
-            // 1. 背景动画
-            anime({
-                targets: '.gradient-orb',
-                translateX: function() {
-                    return anime.random(-50, 50);
-                },
-                translateY: function() {
-                    return anime.random(-50, 50);
-                },
-                scale: function() {
-                    return anime.random(0.9, 1.1);
-                },
-                duration: function() {
-                    return anime.random(5000, 10000);
-                },
-                easing: 'easeInOutQuad',
-                direction: 'alternate',
-                loop: true
-            });
+            document.getElementById('readingProgress').style.width = scrolled + '%';
 
-            // 2. Hero 区域动画
-            anime({
-                targets: '#heroTitle',
-                opacity: [0, 1],
-                translateY: [50, 0],
-                duration: 1200,
-                easing: 'easeOutExpo',
-                delay: 300
-            });
+            // 返回顶部按钮
+            const backToTop = document.getElementById('backToTop');
+            if (winScroll > 500) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+        });
 
-            anime({
-                targets: '#heroSubtitle',
-                opacity: [0, 1],
-                translateY: [30, 0],
-                duration: 1000,
-                easing: 'easeOutExpo',
-                delay: 600
-            });
-
-            anime({
-                targets: '.hero-badge',
-                opacity: [0, 1],
-                scale: [0.8, 1],
-                duration: 800,
-                easing: 'easeOutExpo'
-            });
-
-            anime({
-                targets: '.hero-cta',
-                opacity: [0, 1],
-                translateY: [20, 0],
-                duration: 800,
-                easing: 'easeOutExpo',
-                delay: 1000
-            });
-
-            anime({
-                targets: '.scroll-indicator',
-                opacity: [0, 1],
-                duration: 1000,
-                easing: 'easeOutExpo',
-                delay: 1500
-            });
-
-            // 3. 导航栏动画
-            setTimeout(function() {
-                anime({
-                    targets: '.nav',
-                    translateY: [ -100, 0],
-                    duration: 800,
-                    easing: 'easeOutExpo'
-                });
-            }, 2000);
-
-            // 4. 滚动动画观察器
-            const observerOptions = {
-                threshold: 0.1,
-                rootMargin: "0px 0px -50px 0px"
-            };
-
-            const observer = new IntersectionObserver(function(entries) {
-                entries.forEach(function(entry) {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-
-                        // 卡片进入动画
-                        anime({
-                            targets: entry.target,
-                            opacity: [0, 1],
-                            translateY: [50, 0],
-                            duration: 800,
-                            easing: 'easeOutExpo'
-                        });
-                    }
-                });
-            }, observerOptions);
-
-            document.querySelectorAll('.content-card').forEach(function(card) {
-                observer.observe(card);
-            });
-
-            // 5. 进度条
-            window.addEventListener('scroll', function() {
-                const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-                const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-                const scrolled = (winScroll / height) * 100;
-
-                document.getElementById('readingProgress').style.width = scrolled + '%';
-                document.getElementById('navProgress').style.width = scrolled + '%';
-
-                // 返回顶部按钮
-                const backToTop = document.getElementById('backToTop');
-                if (winScroll > 500) {
-                    backToTop.classList.add('visible');
-                } else {
-                    backToTop.classList.remove('visible');
-                }
-            });
-
-            // 6. 返回顶部
-            document.getElementById('backToTop').addEventListener('click', function() {
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
-            });
-
-            // 7. 章节标题动画
-            const sectionObserver = new IntersectionObserver(function(entries) {
-                entries.forEach(function(entry) {
-                    if (entry.isIntersecting) {
-                        const header = entry.target.querySelector('.section-header');
-                        if (header) {
-                            anime({
-                                targets: header,
-                                opacity: [0, 1],
-                                translateY: [30, 0],
-                                duration: 800,
-                                easing: 'easeOutExpo'
-                            });
-                        }
-                    }
-                });
-            }, { threshold: 0.2 });
-
-            document.querySelectorAll('.section').forEach(function(section) {
-                sectionObserver.observe(section);
-            });
-
-            // 8. 概念网格动画
-            const conceptObserver = new IntersectionObserver(function(entries) {
-                entries.forEach(function(entry) {
-                    if (entry.isIntersecting) {
-                        const items = entry.target.querySelectorAll('.concept-item');
-                        anime({
-                            targets: items,
-                            opacity: [0, 1],
-                            translateY: [30, 0],
-                            duration: 600,
-                            delay: anime.stagger(100),
-                            easing: 'easeOutExpo'
-                        });
-                    }
-                });
-            }, { threshold: 0.2 });
-
-            document.querySelectorAll('.concept-grid').forEach(function(grid) {
-                conceptObserver.observe(grid);
-            });
-
-            // 9. 时间线动画
-            const timelineObserver = new IntersectionObserver(function(entries) {
-                entries.forEach(function(entry) {
-                    if (entry.isIntersecting) {
-                        const items = entry.target.querySelectorAll('.timeline-item');
-                        anime({
-                            targets: items,
-                            opacity: [0, 1],
-                            translateX: [-30, 0],
-                            duration: 600,
-                            delay: anime.stagger(150),
-                            easing: 'easeOutExpo'
-                        });
-                    }
-                });
-            }, { threshold: 0.2 });
-
-            document.querySelectorAll('.timeline').forEach(function(timeline) {
-                timelineObserver.observe(timeline);
-            });
-
-            // 10. 图片加载动画
-            const imageObserver = new IntersectionObserver(function(entries) {
-                entries.forEach(function(entry) {
-                    if (entry.isIntersecting) {
-                        anime({
-                            targets: entry.target,
-                            opacity: [0, 1],
-                            scale: [1.1, 1],
-                            duration: 1000,
-                            easing: 'easeOutExpo'
-                        });
-                    }
-                });
-            }, { threshold: 0.2 });
-
-            document.querySelectorAll('.image-section img').forEach(function(img) {
-                imageObserver.observe(img);
+        // 返回顶部
+        document.getElementById('backToTop').addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
             });
         });
     </script>
