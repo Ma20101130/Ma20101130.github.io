@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>觉醒协议 | 致初三</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            --accent: #ff3b30;
+            --accent-glow: rgba(255, 59, 48, 0.3);
+            --blue-accent: #007aff;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --glass: rgba(255, 255, 255, 0.05);
+            --font-display: 'Noto Serif SC', serif;
+            --font-body: 'Noto Sans SC', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.8;
+        }
+
+        /* 简化背景 - 纯色+微弱网格 */
+        .ambient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background: var(--bg-primary);
+        }
+
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: -1;
+        }
+
+        /* 单一进度条 */
+        .reading-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--blue-accent));
+            width: 0%;
+            z-index: 1001;
+        }
+
+        /* 导航栏 */
+        .nav {
+            position: fixed;
+            top: 3px;
+            left: 0;
+            width: 100%;
+            padding: 0.8rem 2rem;
+            z-index: 1000;
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: var(--font-display);
+            font-weight: 900;
+            font-size: 1rem;
+            letter-spacing: 2px;
+            color: var(--text-primary);
+        }
+
+        /* 主要容器 */
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Hero 区域 */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 6rem 1.5rem;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: var(--glass);
+            border: 1px solid var(--card-border);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, #a0a0a0 50%, #666 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+            color: var(--text-secondary);
+            max-width: 550px;
+            margin-bottom: 3rem;
+            font-weight: 300;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2.5rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .hero-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px var(--accent-glow);
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        /* 章节通用样式 */
+        .section {
+            padding: 5rem 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-number {
+            font-family: var(--font-display);
+            font-size: 0.85rem;
+            color: var(--accent);
+            letter-spacing: 3px;
+            margin-bottom: 0.8rem;
+            display: block;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(1.8rem, 5vw, 2.8rem);
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            line-height: 1.2;
+        }
+
+        .section-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            max-width: 550px;
+            margin: 0 auto;
+        }
+
+        /* 内容卡片 */
+        .content-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .content-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1.2rem;
+            font-size: 1rem;
+            line-height: 1.85;
+        }
+
+        .content-card p:first-of-type {
+            font-size: 1.15rem;
+            color: var(--text-primary);
+        }
+
+        /* 强调文字 */
+        .highlight {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .highlight-blue {
+            color: var(--blue-accent);
+            font-weight: 600;
+        }
+
+        /* 引用块 */
+        .quote-block {
+            border-left: 3px solid var(--accent);
+            padding-left: 1.2rem;
+            margin: 1.5rem 0;
+            color: var(--text-primary);
+            font-style: italic;
+            font-size: 1.05rem;
+        }
+
+        /* 子标题 */
+        .content-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            margin: 1.8rem 0 1rem;
+            color: var(--text-primary);
+        }
+
+        /* 列表 */
+        .content-card ul, .content-card ol {
+            color: var(--text-secondary);
+            margin: 1.2rem 0;
+            padding-left: 1.3rem;
+        }
+
+        .content-card li {
+            margin-bottom: 0.6rem;
+            line-height: 1.7;
+        }
+
+        .content-card li::marker {
+            color: var(--accent);
+        }
+
+        /* 概念网格 */
+        .concept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .concept-item {
+            background: var(--glass);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 1.3rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .concept-item:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent);
+        }
+
+        .concept-icon {
+            font-size: 2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .concept-title {
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .concept-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* 时间线 */
+        .timeline {
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--accent), var(--blue-accent));
+        }
+
+        .timeline-item {
+            padding-left: 1.8rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -5px;
+            top: 6px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        .timeline-time {
+            font-size: 0.8rem;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .timeline-content {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .timeline-content ul {
+            margin: 0.5rem 0;
+        }
+
+        /* 结语区域 */
+        .conclusion {
+            text-align: center;
+            padding: 7rem 0;
+        }
+
+        .conclusion h2 {
+            font-family: var(--font-display);
+            font-size: clamp(1.8rem, 5vw, 3.5rem);
+            font-weight: 900;
+            margin-bottom: 1.8rem;
+            background: linear-gradient(135deg, var(--accent) 0%, #ff6b6b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .conclusion p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 650px;
+            margin: 0 auto 2rem;
+            line-height: 1.8;
+        }
+
+        .btn {
+            padding: 0.9rem 2rem;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0.3rem;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px var(--accent-glow);
+        }
+
+        /* 底部 */
+        .footer {
+            text-align: center;
+            padding: 2.5rem;
+            border-top: 1px solid var(--card-border);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* 返回顶部 */
+        .back-to-top {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 44px;
+            height: 44px;
+            background: var(--glass);
+            border: 1px solid var(--card-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 5rem 1rem;
+            }
+
+            .content-card {
+                padding: 1.8rem 1.3rem;
+            }
+
+            .section {
+                padding: 4rem 0;
+            }
+
+            .nav {
+                padding: 0.7rem 1rem;
+            }
+
+            .concept-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 简化背景 -->
+    <div class="ambient-bg"></div>
+    <div class="grid-bg"></div>
+
+    <!-- 单一进度条 -->
+    <div class="reading-progress" id="readingProgress"></div>
+
+    <!-- 导航栏 -->
+    <nav class="nav">
+        <div class="logo">AWAKENING</div>
+    </nav>
+
+    <!-- Hero 区域 -->
+    <section class="hero">
+        <div class="hero-badge">觉醒协议</div>
+        <h1>觉醒协议</h1>
+        <p class="hero-subtitle">致初三：如何在 24 小时内终结平庸的循环</p>
+        <a href="#intro" class="hero-cta">
+            开始阅读
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
+            </svg>
+        </a>
+        <div class="scroll-indicator">
+            <span>向下滚动</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12l7 7 7-7"/>
+            </svg>
+        </div>
+    </section>
+
+    <!-- 前言 -->
+    <section class="section" id="intro">
+        <div class="container">
+            <div class="content-card">
+                <h2 style="font-family: var(--font-display); font-size: 1.8rem; margin-bottom: 1.2rem;">前言：你不是在"学习"，你是在被"格式化"</h2>
+
+                <p>大多数初三学生正处于一种<span class="highlight">"活死人"</span>的状态。</p>
+
+                <p>你每天 6 点起床，在昏暗的灯光下背诵着你根本不相信的课文，刷着那些你做过一百遍却依然会错的数学题。你以为你在"努力"，以为熬过中考就能获得解放。</p>
+
+                <div class="quote-block">
+                    <strong>让我告诉你真相：</strong>如果你不改变底层的"个人操作系统"，中考之后迎接你的不是解放，而是更高等级的监狱。
+                </div>
+
+                <p>你觉得痛苦、迷茫、想刷手机，不是因为你缺乏意志力，而是因为你正在试图用<span class="highlight">"旧的、破碎的身份"</span>去应对一个"高强度的系统"。你是一个在赛道上拼命奔跑的囚犯，却从没想过拆掉栅栏。</p>
+
+                <p>这篇文章不是为了教你如何多考 10 分，而是为了彻底<span class="highlight-blue">炸毁你过去 15 年建立的认知废墟</span>，让你在一天之内，从一个"被动的做题机器"，进化为"人生的架构师"。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 第一章 -->
+    <section class="section" id="chapter1">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-number">CHAPTER 01</span>
+                <h2 class="section-title">多巴胺的死锁</h2>
+                <p class="section-subtitle">为什么你明明很累却停不下来？</p>
+            </div>
+
+            <div class="content-card">
+                <h3>1. 算法是新时代的奴隶主</h3>
+                <p>你以为你在刷抖音、打游戏是在休息？<span class="highlight">错。你是在向算法交出你的"灵魂控制权"。</span></p>
+
+                <p>当你感到初三的压力大到无法呼吸时，大脑会本能地寻找廉价的多巴胺。算法精准地捕捉到了这种软弱。每一条短视频都是对你认知带宽的"小额贷款"，你以为利息很低，但最终你付出了整个青春的专注力。</p>
+            </div>
+
+            <div class="content-card">
+                <h3>2. 熵增的恐惧</h3>
+                <p>物理学告诉我们，<span class="highlight-blue">孤立系统必然趋向于混乱（熵增）</span>。</p>
+
+                <p>如果不主动输入能量进行"秩序建设"，你的大脑就会自动坍塌成一片混乱。<strong>初三的内耗，本质上就是你大脑内部的"熵"失控了。</strong> 你的焦虑，来源于你明明知道该做什么，却眼睁睁看着自己走向混乱。</p>
+
+                <div class="concept-grid">
+                    <div class="concept-item">
+                        <div class="concept-icon">🧠</div>
+                        <div class="concept-title">认知带宽</div>
+                        <div class="concept-desc">你的大脑处理信息的容量，正在被短视频系统性地压缩</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-icon">⚡</div>
+                        <div class="concept-title">多巴胺借贷</div>
+                        <div class="concept-desc">即时快感的高利息，正在透支你的未来专注力</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-icon">🔄</div>
+                        <div class="concept-title">熵增失控</div>
+                        <div class="concept-desc">不主动建设秩序，你的精神世界必然走向混乱</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 第二章 -->
+    <section class="section" id="chapter2">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-number">CHAPTER 02</span>
+                <h2 class="section-title">身份重置</h2>
+                <p class="section-subtitle">杀掉那个"做题家"</p>
+            </div>
+
+            <div class="content-card">
+                <h3>1. 行为永远无法超越身份</h3>
+                <p>如果你认为自己是一个"数学很差的人"，那么你再怎么刷题也是徒劳。因为你的<span class="highlight">潜意识会为了维持"认知一致性"</span>，通过粗心、走神、抵触来故意搞砸你的考试。</p>
+
+                <div class="quote-block">
+                    <strong>你必须先在精神上成为"那个已经拿到通知书的人"。</strong><br>
+                    这不是心灵鸡汤，这是心理学的逻辑闭环：
+                </div>
+
+                <ol>
+                    <li><strong class="highlight">身份（Identity）</strong> 决定了你的 <strong>认知（Perception）</strong></li>
+                    <li><strong>认知</strong> 过滤了你的 <strong>信息（Input）</strong></li>
+                    <li><strong>信息</strong> 驱动了你的 <strong>行动（Action）</strong></li>
+                </ol>
+            </div>
+
+            <div class="content-card">
+                <h3>2. 拒绝平庸的"社交税"</h3>
+                <p>看看你周围的同学。他们抱怨老师、吐槽作业、聚在一起讨论无聊的八卦。</p>
+
+                <p>如果你想和他们考入同一所平凡的高中，那就加入他们。</p>
+
+                <p>如果你想去更高的地方，你必须立刻支付这笔<span class="highlight-blue">"社交税"</span>——<strong>忍受孤独</strong>。卓越的代名词，就是<span class="highlight">"在人群中保持清醒的孤立"</span>。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 第三章 -->
+    <section class="section" id="chapter3">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-number">CHAPTER 03</span>
+                <h2 class="section-title">专注力黑洞</h2>
+                <p class="section-subtitle">24 小时心理重置协议</p>
+            </div>
+
+            <div class="content-card">
+                <p>你不需要一年时间来改变，你只需要<span class="highlight">彻底觉醒的一天</span>。</p>
+
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-time">08:00 - 10:00</div>
+                        <div class="timeline-content">
+                            <strong>环境的彻底净化</strong>
+                            <ul>
+                                <li><strong>物理清理</strong>：扔掉你书桌上所有无关的杂物。如果你的视觉范围内有手机、漫画、零食，你就是在主动诱惑熵增。</li>
+                                <li><strong>数字断食</strong>：卸载所有非必要的社交和娱乐软件。如果你不敢，说明你已经是电子鸦片的重度成瘾者。</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-time">10:00 - 12:00</div>
+                        <div class="timeline-content">
+                            <strong>视觉锚定</strong>
+                            <p>拿出一张白纸，写下你的"愿景"和"反愿景"。</p>
+                            <ul>
+                                <li><strong>愿景</strong>：如果中考成功，你想要的自由、资源、视野。</li>
+                                <li><strong>反愿景</strong>：如果你失败了，你最恐惧、最厌恶的那种生活。</li>
+                            </ul>
+                            <div class="quote-block">恐惧比欲望更有驱动力。每当你想要放弃时，看看你的反愿景，那是你绝对不能坠入的深渊。</div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-time">14:00 - 22:00</div>
+                        <div class="timeline-content">
+                            <strong>深度学习协议</strong>
+                            <p>停止"表演式努力"。</p>
+                            <p>不要去纠结你已经掌握的知识，那只是在自我欺骗。<span class="highlight">真正的成长，发生在"认知的边缘"</span>。</p>
+                            <p>去啃那些让你大脑发热、让你的呼吸变沉重的难题。那种痛苦，正是神经元在重新连接的物理声音。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 第四章 -->
+    <section class="section" id="chapter4">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-number">CHAPTER 04</span>
+                <h2 class="section-title">系统思维</h2>
+                <p class="section-subtitle">中考只是个"支线任务"</p>
+            </div>
+
+            <div class="content-card">
+                <h3>1. 跨学科的维度打击</h3>
+                <p>不要把数学、物理、语文看作互不相干的学科。</p>
+
+                <div class="concept-grid">
+                    <div class="concept-item">
+                        <div class="concept-icon">📐</div>
+                        <div class="concept-title">数学</div>
+                        <div class="concept-desc">逻辑的骨架，思维的结构</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-icon">📖</div>
+                        <div class="concept-title">语文</div>
+                        <div class="concept-desc">感知的触角，理解的深度</div>
+                    </div>
+                    <div class="concept-item">
+                        <div class="concept-icon">🌍</div>
+                        <div class="concept-title">英语</div>
+                        <div class="concept-desc">获取世界80%信息的密钥</div>
+                    </div>
+                </div>
+
+                <p>当你开始用这种"系统论"视角去看待课本时，你会发现<span class="highlight">中考卷子不过是一场低级的代码重组</span>。</p>
+            </div>
+
+            <div class="content-card">
+                <h3>2. 能量管理，而非时间管理</h3>
+                <p>你不需要每天学 16 个小时。你需要的是 <span class="highlight-blue">4 个小时极度纯净的、不被打断的"神流状态（Flow）"</span>。</p>
+
+                <ul>
+                    <li><strong>早晨</strong>：处理逻辑复杂度最高的任务（数学/物理）</li>
+                    <li><strong>午后</strong>：进行信息的输入与整合</li>
+                    <li><strong>夜晚</strong>：进行复盘与潜意识预热</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- 结语 -->
+    <section class="section" id="conclusion">
+        <div class="container">
+            <div class="conclusion">
+                <h2>从现在开始，接管你的生命</h2>
+
+                <p>初三不是终点，甚至连起点都算是。<br>它只是一次<span class="highlight">"入场券"</span>的争夺。</p>
+
+                <p>如果你依然选择在抖音的算法里沉溺，在老师的督促下被动地像牛一样反刍，那么你这辈子都无法摆脱<span class="highlight">"被操控"</span>的命运。</p>
+
+                <div class="quote-block" style="border-color: var(--blue-accent); font-size: 1.2rem;">
+                    这个世界是一个巨大的镜子。<br>
+                    如果你以平庸的姿态站立，<br>
+                    世界回馈给你的就是破碎的反馈。
+                </div>
+
+                <p style="margin-top: 2.5rem;">现在，放下这篇文章。<br>
+                关掉屏幕。<br>
+                去感受你内心的那股焦虑——<span class="highlight">不要逃避它，它是你的燃料</span>。<br>
+                去接管你的专注力。<br>
+                去重塑你的身份。</p>
+
+                <h2 style="font-size: clamp(1.4rem, 3.5vw, 2.2rem); margin-top: 3.5rem;">
+                    今天，是你作为<span class="highlight">"神谕架构师"</span>出生的第一天。<br>
+                    中考卷子，只是你通往伟大的第一块垫脚石。
+                </h2>
+
+                <div style="margin-top: 2.5rem;">
+                    <a href="#" class="btn btn-primary" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;">
+                        重新阅读
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 底部 -->
+    <footer class="footer">
+        <p>觉醒协议 &copy; 2025</p>
+    </footer>
+
+    <!-- 返回顶部 -->
+    <div class="back-to-top" id="backToTop">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 15l-6-6-6 6"/>
+        </svg>
+    </div>
+
+    <script>
+        // 简单的进度条和返回顶部逻辑
+        window.addEventListener('scroll', function() {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+
+            document.getElementById('readingProgress').style.width = scrolled + '%';
+
+            // 返回顶部按钮
+            const backToTop = document.getElementById('backToTop');
+            if (winScroll > 500) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+        });
+
+        // 返回顶部
+        document.getElementById('backToTop').addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+
+<style>
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.inland-security-footer {
+  position: fixed;
+  z-index: 10;
+  bottom: 0;
+  right: 0;
+  width: fit-content;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.tooltip-container {
+  position: relative;
+}
+
+.trigger-content {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  background-color: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.minimax-link {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 300;
+  color: #adadad;
+  text-decoration: none;
+}
+
+.minimax-link:visited {
+  color: #adadad;
+}
+
+.minimax-link:hover {
+  color: #666666;
+}
+
+.tooltip-content {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  padding-bottom: 16px; /* 8px 内容间距 + 8px 用于鼠标移动的透明区域 */
+  font-size: 12px;
+  line-height: 17px;
+  background-color: #fafafa;
+  border-radius: 12px;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  color: #171717;
+}
+
+/* 创建透明的连接区域，让鼠标可以平滑移动到 tooltip */
+.tooltip-content::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  right: 0;
+  height: 16px;
+}
+
+.tooltip-container:hover .tooltip-content {
+  display: flex;
+}
+
+.info-section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.beian-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #171717;
+}
+
+.beian-icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 2px;
+}
+
+.underline-text {
+  color: #171717;
+  text-decoration: underline;
+}
+
+.underline-text:hover {
+  color: #000000;
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .trigger-content {
+    background-color: transparent;
+  }
+
+  .minimax-link,
+  .minimax-link:visited {
+    color: #666666;
+  }
+
+  .minimax-link:hover {
+    color: #adadad;
+  }
+
+  .tooltip-content {
+    background-color: #262626;
+    color: #ededed;
+  }
+
+  .beian-link,
+  .underline-text {
+    color: #ededed;
+  }
+
+  .underline-text:hover {
+    color: #ffffff;
+  }
+}
+
+</style>
+<div class="inland-security-footer">
+  <div class="tooltip-container">
+    <div class="trigger-content">
+      <a href="https://www.minimaxi.com/" target="_blank" rel="noreferrer" class="minimax-link">
+        <span>© 2026 MiniMax</span>
+      </a>
+    </div>
+    <div class="tooltip-content">
+      <section class="info-section">
+        <span>上海稀宇科技有限公司</span>
+      </section>
+
+      <section class="info-section">
+        <a class="beian-link" href="https://www.beian.gov.cn/portal/registerSystemInfo?recordcode=31010402010179" target="_blank" rel="noreferrer">
+          <img alt="hailuo-beian-icon" src="https://cdn.hailuoai.com/hailuo-video-web/public_assets/223037d3-79fd-4db0-a456-749f38a6a14b.png" class="beian-icon">
+          <span class="underline-text">沪公网安备31010402010179号</span>
+        </a>
+        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer" class="underline-text">
+          沪ICP备2023003282号-38
+        </a>
+      </section>
+
+      <section class="info-section">
+        <span>模型名称：MiniMax</span>
+        <span>备案号：Shanghai-MiniMax-202505230046</span>
+      </section>
+
+      <section class="info-section">
+        <a href="https://agent.minimaxi.com/doc/zh/terms-of-service.html" target="_blank" rel="noreferrer" class="underline-text">
+          用户协议
+        </a>
+        <a href="https://agent.minimaxi.com/doc/zh/privacy-policy.html" target="_blank" rel="noreferrer" class="underline-text">
+          隐私政策
+        </a>
+      </section>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
