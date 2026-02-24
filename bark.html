@@ -369,9 +369,70 @@
         .card form button:hover {
             background-color: var(--apple-light-blue);
         }
+        /* 设备选择器样式 */
+        .device-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 20px;
+        }
+        .device-selector select {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: white;
+            color: #1d1d1f;
+            cursor: pointer;
+            outline: none;
+        }
+        .device-selector select:hover {
+            border-color: var(--apple-blue);
+        }
+        body.dark-mode .device-selector select {
+            background-color: #2c2c2e;
+            color: #f5f5f7;
+            border-color: #48484a;
+        }
+        /* 移动端菜单设备选择器 */
+        .mobile-menu .device-selector {
+            margin: 20px 0;
+            padding: 15px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        body.dark-mode .mobile-menu .device-selector {
+            border-bottom-color: #48484a;
+        }
+        .mobile-menu .device-selector label {
+            font-size: 1.2rem;
+            font-weight: 300;
+        }
+        .mobile-menu .device-selector select {
+            flex: 1;
+            padding: 10px;
+            font-size: 1rem;
+        }
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .device-selector-desktop {
+                display: none;
+            }
+            .nav-container {
+                flex-wrap: wrap;
+            }
+        }
+        @media (min-width: 769px) {
+            .device-selector-mobile {
+                display: none;
+            }
+        }
+        /* 历史消息左滑删除样式 */
         .history-item {
             padding: 0.5rem 0;
             border-bottom: 1px solid #ccc;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
         }
         .history-item:last-of-type {
             border-bottom: none;
@@ -383,6 +444,67 @@
         .history-item .details {
             margin-top: 0.25rem;
             font-size: 0.9rem;
+        }
+        .history-item .delete-btn {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 80px;
+            background-color: #ff3b30;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .history-item.swiped .delete-btn {
+            transform: translateX(0);
+        }
+        .history-item.swiped {
+            transform: translateX(-80px);
+        }
+        /* 重置按钮样式 */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+        .btn-reset {
+            background-color: #8e8e93 !important;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+            flex: 0 0 auto;
+        }
+        .btn-reset:hover {
+            background-color: #636366 !important;
+        }
+        .btn-submit {
+            flex: 1;
+        }
+        /* 移动端菜单操作项样式 */
+        .mobile-menu-actions {
+            border-top: 1px solid #e0e0e0;
+            margin-top: 20px;
+            padding-top: 20px;
+        }
+        body.dark-mode .mobile-menu-actions {
+            border-top-color: #48484a;
+        }
+        .mobile-menu-actions a {
+            color: #ff3b30 !important;
+            font-size: 1.2rem;
+            padding: 15px 0;
+            display: block;
         }
         .status-message {
             margin-top: 1rem;
@@ -487,6 +609,13 @@
     <nav class="nav">
         <div class="nav-container">
             <div class="nav-logo">Bark 控制台</div>
+            <!-- 桌面端设备选择器 -->
+            <div class="device-selector device-selector-desktop">
+                <select id="deviceSelect">
+                    <option value="iphone">iPhone 12 Pro Max</option>
+                    <option value="ipad">iPad Mini 5</option>
+                </select>
+            </div>
             <!-- 桌面导航 - 可选，此处可添加链接 -->
             <ul class="nav-links">
                 <!-- <li><a href="#send">发送</a></li> -->
@@ -503,10 +632,22 @@
     <!-- 移动端菜单 -->
     <div class="mobile-menu" id="mobileMenu">
         <div class="mobile-menu-content">
+            <!-- 移动端设备选择器 -->
+            <div class="device-selector device-selector-mobile">
+                <label>选择设备:</label>
+                <select id="deviceSelectMobile">
+                    <option value="iphone">iPhone 12 Pro Max</option>
+                    <option value="ipad">iPad Mini 5</option>
+                </select>
+            </div>
             <ul>
                 <!-- <li><a href="#send">发送</a></li> -->
                 <!-- <li><a href="#history">历史</a></li> -->
             </ul>
+            <!-- 移动端操作按钮 -->
+            <div class="mobile-menu-actions">
+                <a href="javascript:void(0)" id="deleteCookieBtn">删除所有 Cookie</a>
+            </div>
         </div>
     </div>
     <!-- 内容 -->
@@ -590,7 +731,10 @@
                             <option value="1">是 (传入1)</option>
                         </select>
                     </div>
-                    <button type="submit">发送通知</button>
+                    <div class="button-group">
+                        <button type="button" class="btn-reset" id="resetBtn">重置</button>
+                        <button type="submit" class="btn-submit">发送通知</button>
+                    </div>
                 </form>
                 <div id="statusMessage" class="status-message" style="display: none;"></div>
             </div>
@@ -610,10 +754,34 @@
         </svg>
     </div>
     <script>
-        const deviceKey = 'hUPQUTQChCktjKGDThD7SR'; // 您的固定 device_key
-        const apiUrl = `https://api.day.app/${deviceKey}`;
+        // 设备配置
+        const devices = {
+            iphone: {
+                name: 'iPhone 12 Pro Max',
+                key: 'hUPQUTQChCktjKGDThD7SR'
+            },
+            ipad: {
+                name: 'iPad Mini 5',
+                key: 'S5v9STmq7kB8uQq5tPs9Qm'
+            }
+        };
+
+        const deviceCookieName = 'barkDevice';
+        const formDataCookieName = 'barkFormData';
         const historyCookieName = 'barkHistory';
         const maxHistoryItems = 50; // 最多保存50条历史记录
+
+        // 获取当前选中的设备
+        function getCurrentDevice() {
+            const savedDevice = getCookie(deviceCookieName);
+            return savedDevice && devices[savedDevice] ? savedDevice : 'iphone';
+        }
+
+        // 获取当前API URL
+        function getCurrentApiUrl() {
+            const device = getCurrentDevice();
+            return `https://api.day.app/${devices[device].key}`;
+        }
 
         // 应用主题
         function applyTheme(isDark) {
@@ -690,6 +858,104 @@
             document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
         }
 
+        // 删除所有Cookie
+        function deleteAllCookies() {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i];
+                const eqPos = cookie.indexOf('=');
+                const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+            }
+        }
+
+        // 设备选择器事件处理
+        function handleDeviceChange(device) {
+            setCookie(deviceCookieName, device);
+            // 保存当前表单数据
+            saveFormData();
+            // 恢复表单数据（切换设备后保持内容不消失）
+            restoreFormData();
+        }
+
+        // 桌面端设备选择器
+        document.getElementById('deviceSelect').addEventListener('change', function() {
+            handleDeviceChange(this.value);
+        });
+
+        // 移动端设备选择器
+        document.getElementById('deviceSelectMobile').addEventListener('change', function() {
+            handleDeviceChange(this.value);
+            // 关闭移动菜单
+            document.getElementById('menuToggle').classList.remove('active');
+            document.getElementById('mobileMenu').classList.remove('visible');
+            document.body.style.overflow = '';
+        });
+
+        // 初始化设备选择器
+        function initDeviceSelector() {
+            const currentDevice = getCurrentDevice();
+            document.getElementById('deviceSelect').value = currentDevice;
+            document.getElementById('deviceSelectMobile').value = currentDevice;
+        }
+
+        // 保存表单数据到Cookie
+        function saveFormData() {
+            const formFields = ['title', 'body', 'level', 'sound', 'volume', 'icon', 'group', 'url', 'action', 'call', 'isArchive', 'id', 'delete'];
+            const formData = {};
+            formFields.forEach(field => {
+                const element = document.getElementById(field);
+                if (element) {
+                    formData[field] = element.value;
+                }
+            });
+            setCookie(formDataCookieName, JSON.stringify(formData));
+        }
+
+        // 从Cookie恢复表单数据
+        function restoreFormData() {
+            const cookieValue = getCookie(formDataCookieName);
+            if (cookieValue) {
+                try {
+                    const formData = JSON.parse(cookieValue);
+                    Object.keys(formData).forEach(field => {
+                        const element = document.getElementById(field);
+                        if (element) {
+                            element.value = formData[field];
+                        }
+                    });
+                } catch (e) {
+                    console.error('恢复表单数据失败:', e);
+                }
+            }
+        }
+
+        // 表单字段输入时保存
+        function setupFormAutoSave() {
+            const form = document.getElementById('barkForm');
+            const formFields = form.querySelectorAll('input, select, textarea');
+            formFields.forEach(field => {
+                field.addEventListener('input', saveFormData);
+                field.addEventListener('change', saveFormData);
+            });
+        }
+
+        // 重置按钮功能
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            const form = document.getElementById('barkForm');
+            form.reset();
+            // 重置后清除Cookie保存的表单数据
+            setCookie(formDataCookieName, JSON.stringify({}));
+            showStatusMessage('表单已重置');
+        });
+
+        // 删除Cookie按钮
+        document.getElementById('deleteCookieBtn').addEventListener('click', function() {
+            deleteAllCookies();
+            // 重新加载页面以清除所有状态
+            location.reload();
+        });
+
         // 从Cookie加载历史记录
         function loadHistoryFromCookie() {
             const cookieValue = getCookie(historyCookieName);
@@ -722,6 +988,14 @@
             renderHistoryList(history);
         }
 
+        // 删除历史记录
+        function deleteHistoryItem(index) {
+            const history = loadHistoryFromCookie();
+            history.splice(index, 1);
+            saveHistoryToCookie(history);
+            renderHistoryList(history);
+        }
+
         // 渲染历史列表
         function renderHistoryList(history) {
             const historyListElement = document.getElementById('historyList');
@@ -737,6 +1011,7 @@
                 const item = history[i];
                 const historyItemElement = document.createElement('div');
                 historyItemElement.className = 'history-item';
+                historyItemElement.dataset.index = i;
 
                 const timeElement = document.createElement('div');
                 timeElement.className = 'time';
@@ -754,8 +1029,50 @@
                     <strong>保存:</strong> ${item.isArchive || '(默认)'}
                 `;
 
+                // 添加删除按钮
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.textContent = '删除';
+                deleteBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const index = parseInt(historyItemElement.dataset.index);
+                    deleteHistoryItem(index);
+                });
+
+                // 添加左滑触摸事件
+                let touchStartX = 0;
+                let touchEndX = 0;
+
+                historyItemElement.addEventListener('touchstart', function(e) {
+                    touchStartX = e.changedTouches[0].screenX;
+                }, { passive: true });
+
+                historyItemElement.addEventListener('touchend', function(e) {
+                    touchEndX = e.changedTouches[0].screenX;
+                    handleSwipe();
+                }, { passive: true });
+
+                function handleSwipe() {
+                    const swipeThreshold = 50;
+                    if (touchEndX < touchStartX - swipeThreshold) {
+                        // 左滑
+                        historyItemElement.classList.add('swiped');
+                    } else if (touchEndX > touchStartX + swipeThreshold) {
+                        // 右滑
+                        historyItemElement.classList.remove('swiped');
+                    }
+                }
+
+                // 点击其他地方关闭滑块
+                document.addEventListener('click', function(e) {
+                    if (!historyItemElement.contains(e.target)) {
+                        historyItemElement.classList.remove('swiped');
+                    }
+                });
+
                 historyItemElement.appendChild(timeElement);
                 historyItemElement.appendChild(detailsElement);
+                historyItemElement.appendChild(deleteBtn);
                 historyListElement.appendChild(historyItemElement);
             }
         }
@@ -796,7 +1113,8 @@
             }
 
             try {
-                const response = await fetch(apiUrl, {
+                const currentApiUrl = getCurrentApiUrl();
+                const response = await fetch(currentApiUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -820,18 +1138,8 @@
                     };
                     addHistoryEntry(historyEntry);
                     // 清空表单 (delete 和 id 保留，方便删除操作)
-                    document.getElementById('title').value = '';
-                    document.getElementById('body').value = '';
-                    document.getElementById('level').value = 'active';
-                    document.getElementById('sound').value = '';
-                    document.getElementById('volume').value = '5';
-                    document.getElementById('icon').value = '';
-                    document.getElementById('group').value = '';
-                    document.getElementById('url').value = '';
-                    document.getElementById('action').value = '';
-                    document.getElementById('call').value = '';
-                    document.getElementById('isArchive').value = ''; // 重置为默认选项
-                    document.getElementById('id').value = '';
+                    // 保存表单数据到Cookie
+                    saveFormData();
                 } else {
                     throw new Error(`API响应错误: ${response.status} ${response.statusText}`);
                 }
@@ -843,6 +1151,13 @@
 
         // 页面加载时渲染历史记录
         document.addEventListener('DOMContentLoaded', () => {
+            // 初始化设备选择器
+            initDeviceSelector();
+            // 恢复表单数据（从Cookie）
+            restoreFormData();
+            // 设置表单自动保存
+            setupFormAutoSave();
+            // 渲染历史记录
             const history = loadHistoryFromCookie();
             renderHistoryList(history);
 
@@ -903,5 +1218,192 @@
             }
         });
     </script>
+
+<style>
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.inland-security-footer {
+  position: fixed;
+  z-index: 10;
+  bottom: 0;
+  right: 0;
+  width: fit-content;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.tooltip-container {
+  position: relative;
+}
+
+.trigger-content {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  background-color: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.minimax-link {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 300;
+  color: #adadad;
+  text-decoration: none;
+}
+
+.minimax-link:visited {
+  color: #adadad;
+}
+
+.minimax-link:hover {
+  color: #666666;
+}
+
+.tooltip-content {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  padding-bottom: 16px; /* 8px 内容间距 + 8px 用于鼠标移动的透明区域 */
+  font-size: 12px;
+  line-height: 17px;
+  background-color: #fafafa;
+  border-radius: 12px;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  color: #171717;
+}
+
+/* 创建透明的连接区域，让鼠标可以平滑移动到 tooltip */
+.tooltip-content::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  right: 0;
+  height: 16px;
+}
+
+.tooltip-container:hover .tooltip-content {
+  display: flex;
+}
+
+.info-section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.beian-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #171717;
+}
+
+.beian-icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 2px;
+}
+
+.underline-text {
+  color: #171717;
+  text-decoration: underline;
+}
+
+.underline-text:hover {
+  color: #000000;
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .trigger-content {
+    background-color: transparent;
+  }
+
+  .minimax-link,
+  .minimax-link:visited {
+    color: #666666;
+  }
+
+  .minimax-link:hover {
+    color: #adadad;
+  }
+
+  .tooltip-content {
+    background-color: #262626;
+    color: #ededed;
+  }
+
+  .beian-link,
+  .underline-text {
+    color: #ededed;
+  }
+
+  .underline-text:hover {
+    color: #ffffff;
+  }
+}
+
+</style>
+<div class="inland-security-footer">
+  <div class="tooltip-container">
+    <div class="trigger-content">
+      <a href="https://www.minimaxi.com/" target="_blank" rel="noreferrer" class="minimax-link">
+        <span>© 2026 MiniMax</span>
+      </a>
+    </div>
+    <div class="tooltip-content">
+      <section class="info-section">
+        <span>上海稀宇科技有限公司</span>
+      </section>
+
+      <section class="info-section">
+        <a class="beian-link" href="https://www.beian.gov.cn/portal/registerSystemInfo?recordcode=31010402010179" target="_blank" rel="noreferrer">
+          <img alt="hailuo-beian-icon" src="https://cdn.hailuoai.com/hailuo-video-web/public_assets/223037d3-79fd-4db0-a456-749f38a6a14b.png" class="beian-icon">
+          <span class="underline-text">沪公网安备31010402010179号</span>
+        </a>
+        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer" class="underline-text">
+          沪ICP备2023003282号-38
+        </a>
+      </section>
+
+      <section class="info-section">
+        <span>模型名称：MiniMax</span>
+        <span>备案号：Shanghai-MiniMax-202505230046</span>
+      </section>
+
+      <section class="info-section">
+        <a href="https://agent.minimaxi.com/doc/zh/terms-of-service.html" target="_blank" rel="noreferrer" class="underline-text">
+          用户协议
+        </a>
+        <a href="https://agent.minimaxi.com/doc/zh/privacy-policy.html" target="_blank" rel="noreferrer" class="underline-text">
+          隐私政策
+        </a>
+      </section>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
