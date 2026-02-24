@@ -260,6 +260,7 @@
             padding-top: 60px; /* 为固定导航栏留出空间 */
             position: relative;
             z-index: 1;
+            padding-bottom: 20px; /* 增加底部内边距，避免内容贴底 */
         }
         .title-container {
             height: 40vh;
@@ -717,7 +718,7 @@
                         <select id="isArchive" name="isArchive">
                             <option value="">按APP设置</option>
                             <option value="1">保存 (传入1)</option>
-                            <option value="0">不保存 (传入0)</option> <!-- 新增选项 -->
+                            <option value="0">不保存 (传入0)</option>
                         </select>
                     </div>
                     <div>
@@ -765,24 +766,20 @@
                 key: 'S5v9STmq7kB8uQq5tPs9Qm'
             }
         };
-
         const deviceCookieName = 'barkDevice';
         const formDataCookieName = 'barkFormData';
         const historyCookieName = 'barkHistory';
         const maxHistoryItems = 50; // 最多保存50条历史记录
-
         // 获取当前选中的设备
         function getCurrentDevice() {
             const savedDevice = getCookie(deviceCookieName);
             return savedDevice && devices[savedDevice] ? savedDevice : 'iphone';
         }
-
         // 获取当前API URL
         function getCurrentApiUrl() {
             const device = getCurrentDevice();
             return `https://api.day.app/${devices[device].key}`;
         }
-
         // 应用主题
         function applyTheme(isDark) {
             if (isDark) {
@@ -809,7 +806,6 @@
                 applyTheme(e.matches);
             });
         }
-
         // 导航菜单切换及动画
         const menuToggle = document.getElementById('menuToggle');
         const mobileMenu = document.getElementById('mobileMenu');
@@ -843,21 +839,18 @@
                 document.body.style.overflow = '';
             });
         });
-
         // 获取Cookie
         function getCookie(name) {
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
             if (parts.length === 2) return parts.pop().split(';').shift();
         }
-
         // 设置Cookie
         function setCookie(name, value, days = 365) {
             const expires = new Date();
             expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
             document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
         }
-
         // 删除所有Cookie
         function deleteAllCookies() {
             const cookies = document.cookie.split(';');
@@ -868,7 +861,6 @@
                 document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
             }
         }
-
         // 设备选择器事件处理
         function handleDeviceChange(device) {
             setCookie(deviceCookieName, device);
@@ -877,12 +869,10 @@
             // 恢复表单数据（切换设备后保持内容不消失）
             restoreFormData();
         }
-
         // 桌面端设备选择器
         document.getElementById('deviceSelect').addEventListener('change', function() {
             handleDeviceChange(this.value);
         });
-
         // 移动端设备选择器
         document.getElementById('deviceSelectMobile').addEventListener('change', function() {
             handleDeviceChange(this.value);
@@ -891,14 +881,12 @@
             document.getElementById('mobileMenu').classList.remove('visible');
             document.body.style.overflow = '';
         });
-
         // 初始化设备选择器
         function initDeviceSelector() {
             const currentDevice = getCurrentDevice();
             document.getElementById('deviceSelect').value = currentDevice;
             document.getElementById('deviceSelectMobile').value = currentDevice;
         }
-
         // 保存表单数据到Cookie
         function saveFormData() {
             const formFields = ['title', 'body', 'level', 'sound', 'volume', 'icon', 'group', 'url', 'action', 'call', 'isArchive', 'id', 'delete'];
@@ -911,7 +899,6 @@
             });
             setCookie(formDataCookieName, JSON.stringify(formData));
         }
-
         // 从Cookie恢复表单数据
         function restoreFormData() {
             const cookieValue = getCookie(formDataCookieName);
@@ -929,7 +916,6 @@
                 }
             }
         }
-
         // 表单字段输入时保存
         function setupFormAutoSave() {
             const form = document.getElementById('barkForm');
@@ -939,7 +925,6 @@
                 field.addEventListener('change', saveFormData);
             });
         }
-
         // 重置按钮功能
         document.getElementById('resetBtn').addEventListener('click', function() {
             const form = document.getElementById('barkForm');
@@ -948,14 +933,12 @@
             setCookie(formDataCookieName, JSON.stringify({}));
             showStatusMessage('表单已重置');
         });
-
         // 删除Cookie按钮
         document.getElementById('deleteCookieBtn').addEventListener('click', function() {
             deleteAllCookies();
             // 重新加载页面以清除所有状态
             location.reload();
         });
-
         // 从Cookie加载历史记录
         function loadHistoryFromCookie() {
             const cookieValue = getCookie(historyCookieName);
@@ -969,7 +952,6 @@
             }
             return [];
         }
-
         // 保存历史记录到Cookie
         function saveHistoryToCookie(history) {
             // 限制历史记录数量
@@ -979,7 +961,6 @@
             const serializedHistory = JSON.stringify(history);
             setCookie(historyCookieName, encodeURIComponent(serializedHistory));
         }
-
         // 添加发送记录到历史
         function addHistoryEntry(entry) {
             const history = loadHistoryFromCookie();
@@ -987,7 +968,6 @@
             saveHistoryToCookie(history);
             renderHistoryList(history);
         }
-
         // 删除历史记录
         function deleteHistoryItem(index) {
             const history = loadHistoryFromCookie();
@@ -995,28 +975,23 @@
             saveHistoryToCookie(history);
             renderHistoryList(history);
         }
-
         // 渲染历史列表
         function renderHistoryList(history) {
             const historyListElement = document.getElementById('historyList');
             historyListElement.innerHTML = ''; // 清空现有内容
-
             if (history.length === 0) {
                 historyListElement.innerHTML = '<p>暂无历史记录</p>';
                 return;
             }
-
             // 反向遍历，最新的在最前面
             for (let i = history.length - 1; i >= 0; i--) {
                 const item = history[i];
                 const historyItemElement = document.createElement('div');
                 historyItemElement.className = 'history-item';
                 historyItemElement.dataset.index = i;
-
                 const timeElement = document.createElement('div');
                 timeElement.className = 'time';
                 timeElement.textContent = item.timestamp;
-
                 const detailsElement = document.createElement('div');
                 detailsElement.className = 'details';
                 detailsElement.innerHTML = `
@@ -1028,7 +1003,6 @@
                     <strong>删除:</strong> ${item.delete || '(否)'}<br>
                     <strong>保存:</strong> ${item.isArchive || '(默认)'}
                 `;
-
                 // 添加删除按钮
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'delete-btn';
@@ -1038,20 +1012,16 @@
                     const index = parseInt(historyItemElement.dataset.index);
                     deleteHistoryItem(index);
                 });
-
                 // 添加左滑触摸事件
                 let touchStartX = 0;
                 let touchEndX = 0;
-
                 historyItemElement.addEventListener('touchstart', function(e) {
                     touchStartX = e.changedTouches[0].screenX;
                 }, { passive: true });
-
                 historyItemElement.addEventListener('touchend', function(e) {
                     touchEndX = e.changedTouches[0].screenX;
                     handleSwipe();
                 }, { passive: true });
-
                 function handleSwipe() {
                     const swipeThreshold = 50;
                     if (touchEndX < touchStartX - swipeThreshold) {
@@ -1062,56 +1032,47 @@
                         historyItemElement.classList.remove('swiped');
                     }
                 }
-
                 // 点击其他地方关闭滑块
                 document.addEventListener('click', function(e) {
                     if (!historyItemElement.contains(e.target)) {
                         historyItemElement.classList.remove('swiped');
                     }
                 });
-
                 historyItemElement.appendChild(timeElement);
                 historyItemElement.appendChild(detailsElement);
                 historyItemElement.appendChild(deleteBtn);
                 historyListElement.appendChild(historyItemElement);
             }
         }
-
         // 显示状态消息
         function showStatusMessage(message, isSuccess = true) {
             const statusElement = document.getElementById('statusMessage');
             statusElement.textContent = message;
             statusElement.className = `status-message ${isSuccess ? 'status-success' : 'status-error'}`;
             statusElement.style.display = 'block';
-
             // 3秒后自动隐藏
             setTimeout(() => {
                 statusElement.style.display = 'none';
             }, 3000);
         }
-
         // 表单提交事件处理
         document.getElementById('barkForm').addEventListener('submit', async (e) => {
             e.preventDefault(); // 阻止默认表单提交
-
             // 获取表单数据
             const formData = new FormData(e.target);
             const payload = {};
             const keysToProcess = ['title', 'body', 'level', 'sound', 'volume', 'icon', 'group', 'url', 'action', 'call', 'isArchive', 'id', 'delete'];
-
             keysToProcess.forEach(key => {
                 const value = formData.get(key);
                 if (value !== '') { // 只有当值不为空字符串时才添加到payload
                     payload[key] = value;
                 }
             });
-
             // 检查是否为删除操作，如果是，则必须有ID
             if (payload.delete === '1' && !payload.id) {
                 showStatusMessage('错误: 删除通知需要提供ID。', false);
                 return;
             }
-
             try {
                 const currentApiUrl = getCurrentApiUrl();
                 const response = await fetch(currentApiUrl, {
@@ -1121,7 +1082,6 @@
                     },
                     body: JSON.stringify(payload)
                 });
-
                 if (response.ok) {
                     showStatusMessage('通知发送成功！');
                     // 添加到历史记录
@@ -1148,7 +1108,6 @@
                 showStatusMessage(`发送失败: ${error.message}`, false);
             }
         });
-
         // 页面加载时渲染历史记录
         document.addEventListener('DOMContentLoaded', () => {
             // 初始化设备选择器
@@ -1160,15 +1119,12 @@
             // 渲染历史记录
             const history = loadHistoryFromCookie();
             renderHistoryList(history);
-
             // 滚动动画和进度条逻辑 (复用模板)
             const elements = document.querySelectorAll('.title-container, .card');
             const backToTopButton = document.getElementById('backToTop');
             const progressBar = document.getElementById('progress');
-
             checkVisibility();
             let scrollTimeout;
-
             window.addEventListener('scroll', () => {
                 if (scrollTimeout) {
                     cancelAnimationFrame(scrollTimeout);
@@ -1179,14 +1135,12 @@
                     updateProgressBar();
                 });
             });
-
             backToTopButton.addEventListener('click', () => {
                 window.scrollTo({
                     top: 0,
                     behavior: 'smooth'
                 });
             });
-
             function checkVisibility() {
                 const windowHeight = window.innerHeight || document.documentElement.clientHeight;
                 elements.forEach(element => {
@@ -1202,7 +1156,6 @@
                     }
                 });
             }
-
             function toggleBackToTopButton() {
                 if (window.scrollY > 300) {
                     backToTopButton.classList.add('visible');
@@ -1210,7 +1163,6 @@
                     backToTopButton.classList.remove('visible');
                 }
             }
-
             function updateProgressBar() {
                 const totalHeight = document.body.scrollHeight - window.innerHeight;
                 const progress = (window.scrollY / totalHeight) * 100;
@@ -1218,192 +1170,5 @@
             }
         });
     </script>
-
-<style>
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
-
-.inland-security-footer {
-  position: fixed;
-  z-index: 10;
-  bottom: 0;
-  right: 0;
-  width: fit-content;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.tooltip-container {
-  position: relative;
-}
-
-.trigger-content {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
-  background-color: transparent;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.minimax-link {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  font-weight: 300;
-  color: #adadad;
-  text-decoration: none;
-}
-
-.minimax-link:visited {
-  color: #adadad;
-}
-
-.minimax-link:hover {
-  color: #666666;
-}
-
-.tooltip-content {
-  position: absolute;
-  bottom: 100%;
-  right: 0;
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  padding-bottom: 16px; /* 8px 内容间距 + 8px 用于鼠标移动的透明区域 */
-  font-size: 12px;
-  line-height: 17px;
-  background-color: #fafafa;
-  border-radius: 12px;
-  white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  color: #171717;
-}
-
-/* 创建透明的连接区域，让鼠标可以平滑移动到 tooltip */
-.tooltip-content::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 0;
-  right: 0;
-  height: 16px;
-}
-
-.tooltip-container:hover .tooltip-content {
-  display: flex;
-}
-
-.info-section {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
-}
-
-.beian-link {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  color: #171717;
-}
-
-.beian-icon {
-  width: 14px;
-  height: 14px;
-  margin-right: 2px;
-}
-
-.underline-text {
-  color: #171717;
-  text-decoration: underline;
-}
-
-.underline-text:hover {
-  color: #000000;
-}
-
-/* 深色模式支持 */
-@media (prefers-color-scheme: dark) {
-  .trigger-content {
-    background-color: transparent;
-  }
-
-  .minimax-link,
-  .minimax-link:visited {
-    color: #666666;
-  }
-
-  .minimax-link:hover {
-    color: #adadad;
-  }
-
-  .tooltip-content {
-    background-color: #262626;
-    color: #ededed;
-  }
-
-  .beian-link,
-  .underline-text {
-    color: #ededed;
-  }
-
-  .underline-text:hover {
-    color: #ffffff;
-  }
-}
-
-</style>
-<div class="inland-security-footer">
-  <div class="tooltip-container">
-    <div class="trigger-content">
-      <a href="https://www.minimaxi.com/" target="_blank" rel="noreferrer" class="minimax-link">
-        <span>© 2026 MiniMax</span>
-      </a>
-    </div>
-    <div class="tooltip-content">
-      <section class="info-section">
-        <span>上海稀宇科技有限公司</span>
-      </section>
-
-      <section class="info-section">
-        <a class="beian-link" href="https://www.beian.gov.cn/portal/registerSystemInfo?recordcode=31010402010179" target="_blank" rel="noreferrer">
-          <img alt="hailuo-beian-icon" src="https://cdn.hailuoai.com/hailuo-video-web/public_assets/223037d3-79fd-4db0-a456-749f38a6a14b.png" class="beian-icon">
-          <span class="underline-text">沪公网安备31010402010179号</span>
-        </a>
-        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer" class="underline-text">
-          沪ICP备2023003282号-38
-        </a>
-      </section>
-
-      <section class="info-section">
-        <span>模型名称：MiniMax</span>
-        <span>备案号：Shanghai-MiniMax-202505230046</span>
-      </section>
-
-      <section class="info-section">
-        <a href="https://agent.minimaxi.com/doc/zh/terms-of-service.html" target="_blank" rel="noreferrer" class="underline-text">
-          用户协议
-        </a>
-        <a href="https://agent.minimaxi.com/doc/zh/privacy-policy.html" target="_blank" rel="noreferrer" class="underline-text">
-          隐私政策
-        </a>
-      </section>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
